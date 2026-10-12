@@ -179,9 +179,9 @@ class FinancialPerformanceService
                     $data['departments'][$dashDept]['target_annual'] = $annual;
                     $data['departments'][$dashDept]['target_quarterly'] = $quarterly;
 
-                    // Update monthly targets array for this department (first 6 months or all 12)
+                    // Update monthly targets array for this department (all 12 months)
                     if (isset($data['monthly_targets'][$dashDept])) {
-                        for ($i = 0; $i < 6; $i++) {
+                        for ($i = 0; $i < 12; $i++) {
                             $data['monthly_targets'][$dashDept][$i] = $monthlyTarget;
                         }
                     }
@@ -207,9 +207,34 @@ class FinancialPerformanceService
 
                     $targetKey = $unitName === 'IT' ? 'IT_sales' : $unitName;
                     if (isset($data['monthly_targets'][$targetKey])) {
-                        for ($i = 0; $i < 6; $i++) {
+                        for ($i = 0; $i < 12; $i++) {
                             $data['monthly_targets'][$targetKey][$i] = $monthlyTarget;
                         }
+                    }
+                }
+            }
+        }
+
+        // Fill any null months 0..11 in monthly_targets using target_annual / 12
+        foreach ($sbuMap as $dbDept => $dashDept) {
+            $annual = (float) ($data['departments'][$dashDept]['target_annual'] ?? 0);
+            if ($annual > 0 && isset($data['monthly_targets'][$dashDept])) {
+                $monthly = $annual / 12;
+                for ($i = 0; $i < 12; $i++) {
+                    if (!isset($data['monthly_targets'][$dashDept][$i]) || $data['monthly_targets'][$dashDept][$i] === null) {
+                        $data['monthly_targets'][$dashDept][$i] = $monthly;
+                    }
+                }
+            }
+        }
+        foreach ($salesUnitMap as $dbDept => $unitName) {
+            $annual = (float) ($data['sales_units'][$unitName]['target_annual'] ?? 0);
+            $targetKey = $unitName === 'IT' ? 'IT_sales' : $unitName;
+            if ($annual > 0 && isset($data['monthly_targets'][$targetKey])) {
+                $monthly = $annual / 12;
+                for ($i = 0; $i < 12; $i++) {
+                    if (!isset($data['monthly_targets'][$targetKey][$i]) || $data['monthly_targets'][$targetKey][$i] === null) {
+                        $data['monthly_targets'][$targetKey][$i] = $monthly;
                     }
                 }
             }

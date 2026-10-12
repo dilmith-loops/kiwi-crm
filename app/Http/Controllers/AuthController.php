@@ -115,7 +115,7 @@ class AuthController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
-        $this->logAction("Reset password", $user);
+        $this->logAction('Reset password', $user);
 
         return redirect()->back()->with('success', 'Your password has been updated successfully!');
     }
@@ -209,7 +209,7 @@ class AuthController extends Controller
         // Delete token record
         \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        $this->logAction("Reset password via OTP", $user, [], $user->id);
+        $this->logAction('Reset password', $user, [], $user->id);
 
         return redirect()->route('login')->with('success', 'Your password has been reset successfully! You can now log in with your new password.');
     }
