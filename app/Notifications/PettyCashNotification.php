@@ -1,0 +1,364 @@
+<?php
+
+namespace App\Notifications;
+
+use App\Mail\PettyCashVoucherMail;
+use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
+
+class PettyCashNotification extends Notification
+{
+    public $pettyCash;
+    public $action;
+    public $note;
+    public $actor;
+
+    /**
+     * Default Super Admin fallback email addresses.
+     */
+    public const DEFAULT_SUPER_ADMIN_EMAILS = [];
+
+    /**
+     * Backwards-compatible alias.
+     */
+    public const SUPER_ADMIN_EMAILS = [];
+
+    /**
+     * Get configured Super Admin notification recipient emails from Settings.
+     *
+     * @return array<int, string>
+     */
+    public static function getConfiguredSuperAdminEmails(): array
+    {
+        $settingValue = \App\Models\Setting::get('super_admin_notification_emails');
+        $cleanEmails = [];
+
+        if ($settingValue !== null && trim((string)$settingValue) !== '') {
+            $emails = preg_split('/[\r\n,;]+/', (string)$settingValue);
+            foreach ($emails as $email) {
+                $email = trim($email);
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $cleanEmails[] = strtolower($email);
+                }
+            }
+        }
+
+        // Include any registered users with Super Admin or Finance Admin role
+        $adminUsers = User::whereIn('role', ['Super Admin', 'Finance Admin'])->get();
+        foreach ($adminUsers as $aUser) {
+            if (!empty($aUser->email) && filter_var($aUser->email, FILTER_VALIDATE_EMAIL)) {
+                $cleanEmails[] = strtolower(trim($aUser->email));
+            }
+        }
+
+        return !empty($cleanEmails) ? array_values(array_unique($cleanEmails)) : [];
+    }
+
+    /**
+     * Helper to retrieve all Super Admin notification targets (DB users matching configured emails + external mail routes).
+     */
+    public static function getSuperAdminRecipients($excludeUserId = null)
+    {
+        $recipients = collect();
+        $configuredEmails = self::getConfiguredSuperAdminEmails();
+        $processedEmails = [];
+
+        foreach ($configuredEmails as $email) {
+            $email = strtolower(trim($email));
+            if (empty($email) || in_array($email, $processedEmails)) {
+                continue;
+            }
+            $processedEmails[] = $email;
+
+            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+            if ($user) {
+                if (!$excludeUserId || $user->id != $excludeUserId) {
+                    $recipients->push($user);
+                }
+            } else {
+                $recipients->push(NotificationFacade::route('mail', $email));
+            }
+        }
+
+        return $recipients;
+    }
+
+    /**
+     * Get configured Management notification recipient emails from Settings and registered Management users.
+     *
+     * @return array<int, string>
+     */
+    public static function getConfiguredManagementEmails(): array
+    {
+        $settingValue = \App\Models\Setting::get('management_notification_emails');
+        $cleanEmails = [];
+
+        if ($settingValue !== null && trim((string)$settingValue) !== '') {
+            $emails = preg_split('/[\r\n,;]+/', (string)$settingValue);
+            foreach ($emails as $email) {
+                $email = trim($email);
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $cleanEmails[] = strtolower($email);
+                }
+            }
+        }
+
+        // Include any registered users with the 'Management' role
+        $managementUsers = User::where('role', 'Management')->get();
+        foreach ($managementUsers as $mUser) {
+            if (!empty($mUser->email) && filter_var($mUser->email, FILTER_VALIDATE_EMAIL)) {
+                $cleanEmails[] = strtolower(trim($mUser->email));
+            }
+        }
+
+        return !empty($cleanEmails) ? array_values(array_unique($cleanEmails)) : [];
+    }
+
+    /**
+     * Helper to retrieve all Management notification targets (DB users matching configured emails/role + external mail routes).
+     */
+    public static function getManagementRecipients($excludeUserId = null)
+    {
+        $recipients = collect();
+        $configuredEmails = self::getConfiguredManagementEmails();
+        $processedEmails = [];
+
+        foreach ($configuredEmails as $email) {
+            $email = strtolower(trim($email));
+            if (empty($email) || in_array($email, $processedEmails)) {
+                continue;
+            }
+            $processedEmails[] = $email;
+
+            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+            if ($user) {
+                if (!$excludeUserId || $user->id != $excludeUserId) {
+                    $recipients->push($user);
+                }
+            } else {
+                $recipients->push(NotificationFacade::route('mail', $email));
+            }
+        }
+
+        return $recipients;
+    }
+
+    /**
+     * Create a new notification instance.
+     */
+    public function __construct($pettyCash, $action, $actor, $note = null)
+    {
+        $this->pettyCash = $pettyCash;
+        $this->action = $action;
+        $this->actor = $actor;
+        $this->note = $note;
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        $channels = [];
+
+        if (method_exists($notifiable, 'getKey') && $notifiable->getKey()) {
+            $channels[] = 'database';
+        }
+
+        if ($this->shouldSendMailTo($notifiable)) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
+    }
+
+    /**
+     * Determine whether an email message should be sent to the notifiable.
+     *
+     * Rules:
+     * 1. Requester always receives emails for their own requests.
+     * 2. HOD receives email ONLY if HOD approval is needed.
+     * 3. Finance Admin receives email ONLY if Finance approval is needed.
+     * 4. Management receives email ONLY if Management approval is needed.
+     */
+    public function shouldSendMailTo(object $notifiable): bool
+    {
+        $hasMailRoute = !empty($notifiable->email) 
+            || (method_exists($notifiable, 'routeNotificationFor') && $notifiable->routeNotificationFor('mail'))
+            || ($notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable && !empty($notifiable->routes['mail']));
+
+        if (!$hasMailRoute) {
+            return false;
+        }
+
+        $pettyCash = $this->pettyCash;
+        if (!$pettyCash) {
+            return false;
+        }
+
+        $notifiableId = method_exists($notifiable, 'getKey') ? $notifiable->getKey() : ($notifiable->id ?? null);
+        $notifiableEmail = strtolower(
+            $notifiable->email 
+            ?? (method_exists($notifiable, 'routeNotificationFor') ? (string)$notifiable->routeNotificationFor('mail') : '')
+            ?? ($notifiable->routes['mail'] ?? '')
+        );
+
+        $requesterId = $pettyCash->user_id;
+        $requesterEmail = strtolower($pettyCash->user->email ?? '');
+
+        // 0. Notification to sign voucher is exclusively for the requester
+        if ($this->action === 'notify_sign_voucher') {
+            return ($notifiableId && $notifiableId == $requesterId) || ($notifiableEmail && $requesterEmail && $notifiableEmail === $requesterEmail);
+        }
+
+        // 1. Requester always receives emails for their own requests
+        if (($notifiableId && $notifiableId == $requesterId) || ($notifiableEmail && $requesterEmail && $notifiableEmail === $requesterEmail)) {
+            return true;
+        }
+
+        // 2. Check if HOD approval is needed for this notification
+        $isHodApprovalNeeded = (
+            ($this->action === 'submitted' && $pettyCash->status === 'pending_hod') ||
+            ($this->action === 'reappealed' && $pettyCash->status === 'pending_hod') ||
+            ($this->action === 'iou_settlement_exceeded' && $pettyCash->status === 'pending_settlement_hod')
+        );
+
+        if ($isHodApprovalNeeded) {
+            $associatedHod = $pettyCash->associated_hod;
+            $associatedHodId = $associatedHod ? $associatedHod->id : $pettyCash->hod_id;
+            $associatedHodEmail = strtolower($associatedHod ? ($associatedHod->email ?? '') : ($pettyCash->hod->email ?? ''));
+
+            if (($associatedHodId && $notifiableId && $notifiableId == $associatedHodId) ||
+                ($associatedHodEmail && $notifiableEmail && $notifiableEmail === $associatedHodEmail)) {
+                return true;
+            }
+        }
+
+        // 3. Check if Finance Admin approval is needed for this notification
+        $isFinanceApprovalNeeded = (
+            ($this->action === 'submitted' && in_array($pettyCash->status, ['pending_super_admin', 'pending_settlement'])) ||
+            ($this->action === 'hod_approved' && $pettyCash->status === 'pending_super_admin') ||
+            ($this->action === 'management_approved' && $pettyCash->status === 'pending_super_admin') ||
+            ($this->action === 'iou_settlement_hod_approved' && $pettyCash->status === 'pending_settlement') ||
+            ($this->action === 'reappealed' && $pettyCash->status === 'pending_super_admin') ||
+            ($this->action === 'iou_settlement_exceeded' && $pettyCash->status === 'pending_settlement')
+        );
+
+        if ($isFinanceApprovalNeeded) {
+            $superAdminEmails = self::getConfiguredSuperAdminEmails();
+            $isFinanceAdmin = in_array($notifiableEmail, $superAdminEmails)
+                || (method_exists($notifiable, 'isFinanceAdmin') && $notifiable->isFinanceAdmin())
+                || (isset($notifiable->role) && in_array(strtolower($notifiable->role), ['finance admin', 'super admin']));
+
+            if ($isFinanceAdmin) {
+                return true;
+            }
+        }
+
+        // 4. Check if Management approval is needed for this notification
+        $isManagementApprovalNeeded = (
+            $this->action === 'sent_to_management' && $pettyCash->status === 'pending_management'
+        );
+
+        if ($isManagementApprovalNeeded) {
+            $managementEmails = self::getConfiguredManagementEmails();
+            $isManagement = in_array($notifiableEmail, $managementEmails)
+                || (method_exists($notifiable, 'isManagement') && $notifiable->isManagement())
+                || (isset($notifiable->role) && in_array(strtolower($notifiable->role), ['management']));
+
+            if ($isManagement) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): PettyCashVoucherMail
+    {
+        $mailable = new PettyCashVoucherMail($this->pettyCash, $this->action, $this->actor, $this->note, $notifiable);
+
+        $email = $notifiable->email ?? (method_exists($notifiable, 'routeNotificationFor') ? $notifiable->routeNotificationFor('mail') : null);
+        if ($email) {
+            $mailable->to($email);
+        }
+
+        return $mailable;
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        $actorName = $this->actor->name ?? 'System';
+        $ref = $this->pettyCash->reference_number;
+        $message = "";
+
+        switch ($this->action) {
+            case 'submitted':
+                $message = "New Petty Cash request {$ref} submitted requiring HOD approval.";
+                break;
+            case 'hod_approved':
+                $message = "Petty Cash request {$ref} was approved by HOD and awaits Finance approval.";
+                break;
+            case 'hod_rejected':
+                $message = "Petty Cash request {$ref} was rejected by HOD. Reason: {$this->note}";
+                break;
+            case 'admin_approved':
+                $message = "Petty Cash request {$ref} was APPROVED by Finance." . ($this->pettyCash->isIOU() ? " (Must be settled within 72 hours)" : "");
+                break;
+            case 'admin_rejected':
+                $message = "Petty Cash request {$ref} was REJECTED by Finance. Reason: {$this->note}";
+                break;
+            case 'iou_settled':
+                $message = "IOU request {$ref} settlement has been APPROVED by Finance.";
+                break;
+            case 'iou_reminder':
+                $message = "REMINDER: IOU request {$ref} requires settlement (72-hour policy).";
+                break;
+            case 'reappealed':
+                $message = "Petty Cash request {$ref} has been re-appealed.";
+                break;
+            case 'sent_to_management':
+                $message = "Petty Cash request {$ref} was forwarded to Management for approval." . ($this->note ? " Reason: {$this->note}" : "");
+                break;
+            case 'management_approved':
+                $message = "Petty Cash request {$ref} was APPROVED by Management and awaits Finance final approval & disbursement.";
+                break;
+            case 'management_rejected':
+                $message = "Petty Cash request {$ref} was REJECTED by Management. Reason: {$this->note}";
+                break;
+            case 'iou_settlement_exceeded':
+                $message = "IOU request {$ref} settlement EXCEEDED approved amount and requires HOD approval.";
+                break;
+            case 'iou_settlement_hod_approved':
+                $message = "Exceeded IOU settlement {$ref} was APPROVED by HOD and awaits Finance approval.";
+                break;
+            case 'notify_sign_voucher':
+                $message = "Please visit the Finance Department to sign the voucher for {$ref}.";
+                break;
+            default:
+                $message = "Petty Cash request {$ref} was updated.";
+                break;
+        }
+
+        return [
+            'message' => $message,
+            'petty_cash_id' => $this->pettyCash->id,
+            'reference_number' => $ref,
+            'actor_name' => $actorName,
+            'action' => $this->action,
+        ];
+    }
+}

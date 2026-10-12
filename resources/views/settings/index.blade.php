@@ -1,0 +1,1255 @@
+@extends('layouts.app')
+
+@section('header', 'System Settings')
+
+@section('content')
+    <div class="max-w-6xl mx-auto space-y-8 pb-12">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <!-- Sidebar Navigation for Settings -->
+            <div class="col-span-1 space-y-2">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider px-1 sm:px-3 mb-2">Management</h3>
+                <div class="flex flex-row overflow-x-auto whitespace-nowrap pb-2 md:pb-0 gap-2 md:flex-col md:space-y-2 md:gap-0 -mx-2 px-2 md:mx-0 md:px-0">
+                    <button onclick="showSection('general')"
+                        class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                        id="btn-general">
+                        <i class="fas fa-building mr-2 text-brand-blue"></i> Company & Branding
+                    </button>
+                    <button onclick="showSection('tax')"
+                        class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                        id="btn-tax">
+                        <i class="fas fa-percentage mr-2 text-green-600"></i> Tax Rates (VAT/SSCL)
+                    </button>
+                    <button onclick="showSection('terms')"
+                        class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                        id="btn-terms">
+                        <i class="fas fa-file-contract mr-2 text-brand-pink"></i> Standard Terms
+                    </button>
+                    <button onclick="showSection('targets')"
+                        class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                        id="btn-targets">
+                        <i class="fas fa-bullseye mr-2 text-red-500"></i> Targets
+                    </button>
+                    @if(auth()->user()->hasAdminPrivileges())
+                        <button onclick="showSection('notifications')"
+                            class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                            id="btn-notifications">
+                            <i class="fas fa-envelope mr-2 text-purple-600"></i> Notification Emails
+                        </button>
+                        <button onclick="showSection('currencies')"
+                            class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                            id="btn-currencies">
+                            <i class="fas fa-coins mr-2 text-yellow-500"></i> Currencies
+                        </button>
+                        <button onclick="showSection('expense-categories')"
+                            class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                            id="btn-expense-categories">
+                            <i class="fas fa-tags mr-2 text-indigo-500"></i> Expense Categories
+                        </button>
+                    @endif
+                    @if(auth()->user()->hasAdminPrivileges() || auth()->user()->hasRole('IT Admin'))
+                        <button onclick="showSection('departments')"
+                            class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                            id="btn-departments">
+                            <i class="fas fa-sitemap mr-2 text-blue-600"></i> Departments
+                        </button>
+                        <button onclick="showSection('maintenance')"
+                            class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                            id="btn-maintenance">
+                            <i class="fas fa-tools mr-2 text-orange-500"></i> Maintenance Mode
+                        </button>
+                        <button onclick="showSection('webhook')"
+                            class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                            id="btn-webhook">
+                            <i class="fas fa-network-wired mr-2 text-purple-600"></i> Workflow Webhook
+                        </button>
+                    @endif
+                    @if(auth()->user()->isITAdmin())
+                        <button onclick="showSection('financial-performance-settings')"
+                            class="section-btn text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-brand-blue transition-all shrink-0 text-xs sm:text-sm"
+                            id="btn-financial-performance-settings">
+                            <i class="fas fa-chart-line mr-2 text-emerald-500"></i> Financial Performance
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Settings Content Area -->
+            <div class="col-span-1 md:col-span-2">
+                <!-- General Settings Section -->
+                <section id="section-general" class="settings-section space-y-6">
+                    <form action="{{ route('settings.updateGeneral') }}" method="POST">
+                        @csrf
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                <h3 class="text-lg font-bold text-gray-800">Company Information</h3>
+                                <button type="submit"
+                                    class="px-4 py-2 bg-brand-pink text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all">
+                                    Save Changes
+                                </button>
+                            </div>
+                            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                                    <input type="text" name="company_name"
+                                        value="{{ \App\Models\Setting::get('company_name') }}"
+                                        class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 1</label>
+                                    <input type="text" name="company_address_1"
+                                        value="{{ \App\Models\Setting::get('company_address_1') }}"
+                                        class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 2</label>
+                                    <input type="text" name="company_address_2"
+                                        value="{{ \App\Models\Setting::get('company_address_2') }}"
+                                        class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                    <input type="text" name="company_phone"
+                                        value="{{ \App\Models\Setting::get('company_phone') }}"
+                                        class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                                    <input type="text" name="company_web"
+                                        value="{{ \App\Models\Setting::get('company_web') }}"
+                                        class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">VAT Number</label>
+                                    <input type="text" name="company_vat"
+                                        value="{{ \App\Models\Setting::get('company_vat') }}"
+                                        class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                                <h3 class="text-lg font-bold text-gray-800">Visual Identity (Brand Colors)</h3>
+                            </div>
+                            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Primary (Pink)</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" name="brand_pink"
+                                            value="{{ \App\Models\Setting::get('brand_pink') }}"
+                                            class="h-10 w-10 p-0 border-none rounded">
+                                        <input type="text" name="brand_pink_val" disabled
+                                            value="{{ \App\Models\Setting::get('brand_pink') }}"
+                                            class="bg-gray-50 text-gray-500 border-none text-sm rounded">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Secondary (Blue)</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" name="brand_blue"
+                                            value="{{ \App\Models\Setting::get('brand_blue') }}"
+                                            class="h-10 w-10 p-0 border-none rounded">
+                                        <input type="text" name="brand_blue_val" disabled
+                                            value="{{ \App\Models\Setting::get('brand_blue') }}"
+                                            class="bg-gray-50 text-gray-500 border-none text-sm rounded">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Accent (Purple)</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" name="brand_purple"
+                                            value="{{ \App\Models\Setting::get('brand_purple') }}"
+                                            class="h-10 w-10 p-0 border-none rounded">
+                                        <input type="text" name="brand_purple_val" disabled
+                                            value="{{ \App\Models\Setting::get('brand_purple') }}"
+                                            class="bg-gray-50 text-gray-500 border-none text-sm rounded">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Info (Teal)</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" name="brand_teal"
+                                            value="{{ \App\Models\Setting::get('brand_teal') }}"
+                                            class="h-10 w-10 p-0 border-none rounded">
+                                        <input type="text" name="brand_teal_val" disabled
+                                            value="{{ \App\Models\Setting::get('brand_teal') }}"
+                                            class="bg-gray-50 text-gray-500 border-none text-sm rounded">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Tax Settings Section -->
+                <section id="section-tax" class="settings-section hidden space-y-6">
+                    <form action="{{ route('settings.updateTax') }}" method="POST">
+                        @csrf
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                <h3 class="text-lg font-bold text-gray-800">Tax Rates</h3>
+                                <button type="submit"
+                                    class="px-4 py-2 bg-brand-pink text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all">
+                                    Save Rates
+                                </button>
+                            </div>
+                            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">SSCL Rate (%)</label>
+                                    <div class="relative rounded-md shadow-sm">
+                                        <input type="number" step="0.0001" name="sscl_rate"
+                                            value="{{ \App\Models\Setting::get('sscl_rate', 2.5641) }}"
+                                            class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm pr-8">
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">%</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">SSCL rate is used in tax calculations.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">VAT Rate (%)</label>
+                                    <div class="relative rounded-md shadow-sm">
+                                        <input type="number" step="0.01" name="vat_rate"
+                                            value="{{ \App\Models\Setting::get('vat_rate', 15) }}"
+                                            class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm pr-8">
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">%</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+
+                <!-- Standard Terms Section -->
+                <section id="section-terms" class="settings-section hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <h3 class="text-lg font-bold text-gray-800">Standard Estimate/Invoice Terms</h3>
+                        </div>
+                        <div class="p-6">
+                            <form action="{{ route('settings.storeTerm') }}" method="POST" class="mb-6 space-y-3">
+                                @csrf
+                                <textarea name="content" placeholder="New term content..." required
+                                    class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm"
+                                    rows="2"></textarea>
+                                <div class="flex justify-end">
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-brand-pink text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all">
+                                        <i class="fas fa-plus mr-1"></i> Add Term
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div class="space-y-4">
+                                @foreach($terms as $term)
+                                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 relative group">
+                                        <p class="text-sm text-gray-600 italic pr-16">"{{ $term->content }}"</p>
+                                        <div
+                                            class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                            <button
+                                                onclick="editTerm('{{ route('settings.updateTerm', $term) }}', '{{ addslashes($term->content) }}')"
+                                                class="text-blue-500 hover:text-blue-700">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <a href="{{ route('settings.destroyTerm.get', $term) }}"
+                                                onclick="return confirm('Are you sure you want to delete this term?');"
+                                                class="text-red-500 hover:text-red-700 inline-flex items-center gap-1 ml-2">
+                                                <i class="fas fa-times-circle pointer-events-none"></i> Delete
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Edit Term Modal -->
+                        <div id="editTermModal"
+                            class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+                            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                                <div class="mt-3">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900 border-b pb-2">Edit Term</h3>
+                                    <form id="editTermForm" method="POST" class="mt-4">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="mb-4">
+                                            <label class="block text-gray-700 text-sm font-bold mb-2">Content</label>
+                                            <textarea name="content" id="edit_term_content" required rows="4"
+                                                class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm"></textarea>
+                                        </div>
+                                        <div class="flex justify-end gap-2">
+                                            <button type="button"
+                                                onclick="document.getElementById('editTermModal').classList.add('hidden')"
+                                                class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                                                Cancel
+                                            </button>
+                                            <button type="submit"
+                                                class="px-4 py-2 bg-brand-blue text-white text-base font-medium rounded-md hover:bg-brand-purple focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                                Update
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+                
+                <!-- Targets Section -->
+                <section id="section-targets" class="settings-section hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <h3 class="text-lg font-bold text-gray-800">Department Targets (LKR)</h3>
+                        </div>
+                        <div class="p-6">
+                            <form action="{{ route('settings.updateDepartmentTargets') }}" method="POST">
+                                @csrf
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    @php
+                                        $departments = \App\Models\User::getDepartmentList();
+                                    @endphp
+                                    @foreach($departments as $dept)
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $dept }}</label>
+                                            <input type="number" step="0.01" name="targets[{{ $dept }}]"
+                                                value="{{ isset($departmentTargets[$dept]) ? $departmentTargets[$dept]->target_amount : 0 }}"
+                                                class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="mt-6 flex justify-end">
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-brand-pink text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all">
+                                        Save Department Targets
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden mt-8">
+                        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <h3 class="text-lg font-bold text-gray-800">User Targets (LKR)</h3>
+                        </div>
+                        <div class="p-6">
+                            <form action="{{ route('settings.updateUserTargets') }}" method="POST">
+                                @csrf
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    @foreach($users as $user)
+                                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                            <label class="block text-sm font-medium text-gray-800 mb-1">
+                                                {{ $user->name }}
+                                                <span class="text-xs text-brand-blue block">{{ $user->department ?? 'No Dept' }}</span>
+                                            </label>
+                                            <input type="number" step="0.01" name="targets[{{ $user->id }}]"
+                                                value="{{ isset($userTargets[$user->id]) ? $userTargets[$user->id]->target_amount : 0 }}"
+                                                class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm mt-2">
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="mt-6 flex justify-end">
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all">
+                                        Save User Targets
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Currency Management Section (Finance Admin / Management) -->
+                @if(auth()->user()->hasAdminPrivileges())
+                    <section id="section-currencies" class="settings-section hidden space-y-6">
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                                <h3 class="text-lg font-bold text-gray-800">Supported Currencies</h3>
+                            </div>
+                            <div class="p-6">
+                                <!-- Add Currency Form -->
+                                <form action="{{ route('settings.storeCurrency') }}" method="POST"
+                                    class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                    @csrf
+                                    <h4 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Add New
+                                        Currency</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">Currency Code (e.g.
+                                                USD)</label>
+                                            <input type="text" name="code" placeholder="USD" required maxlength="3"
+                                                class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm uppercase">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">Currency Name</label>
+                                            <input type="text" name="name" placeholder="US Dollar"
+                                                class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">Symbol</label>
+                                            <input type="text" name="symbol" placeholder="$"
+                                                class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                        </div>
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all w-full">
+                                            <i class="fas fa-plus mr-1"></i> Add Currency
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <!-- Currency List -->
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Code</th>
+                                                <th
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Name</th>
+                                                <th
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Symbol</th>
+                                                <th
+                                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach($currencies as $currency)
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        {{ $currency->code }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ $currency->name }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ $currency->symbol }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                        <button
+                                                            onclick="editCurrency('{{ route('settings.updateCurrency', $currency) }}', '{{ $currency->code }}', '{{ addslashes($currency->name) }}', '{{ $currency->symbol }}')"
+                                                            class="text-blue-500 hover:text-blue-700 transition-colors mr-2">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <a href="{{ route('settings.destroyCurrency.get', $currency) }}"
+                                                            onclick="return confirm('Are you sure you want to delete this currency?');"
+                                                            class="text-red-500 hover:text-red-700 transition-colors inline-flex items-center gap-1 ml-2">
+                                                            <i class="fas fa-trash-alt pointer-events-none"></i> Delete
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Edit Currency Modal -->
+                            <div id="editCurrencyModal"
+                                class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+                                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                                    <div class="mt-3">
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900 border-b pb-2">Edit Currency</h3>
+                                        <form id="editCurrencyForm" method="POST" class="mt-4">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="mb-4">
+                                                <label class="block text-gray-700 text-sm font-bold mb-2">Code</label>
+                                                <input type="text" name="code" id="edit_currency_code" required maxlength="3"
+                                                    class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm uppercase">
+                                            </div>
+                                            <div class="mb-4">
+                                                <label class="block text-gray-700 text-sm font-bold mb-2">Name</label>
+                                                <input type="text" name="name" id="edit_currency_name"
+                                                    class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                            </div>
+                                            <div class="mb-4">
+                                                <label class="block text-gray-700 text-sm font-bold mb-2">Symbol</label>
+                                                <input type="text" name="symbol" id="edit_currency_symbol"
+                                                    class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                            </div>
+                                            <div class="flex justify-end gap-2">
+                                                <button type="button"
+                                                    onclick="document.getElementById('editCurrencyModal').classList.add('hidden')"
+                                                    class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                                                    Cancel
+                                                </button>
+                                                <button type="submit"
+                                                    class="px-4 py-2 bg-brand-blue text-white text-base font-medium rounded-md hover:bg-brand-purple focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                                    Update
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Notification Emails Section -->
+                    <section id="section-notifications" class="settings-section hidden space-y-6">
+                        <form action="{{ route('settings.updateNotifications') }}" method="POST">
+                            @csrf
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                    <div>
+                                        <div class="flex items-center space-x-2">
+                                            <h3 class="text-lg font-bold text-gray-800">Notification Emails</h3>
+                                            <span class="px-2 py-0.5 text-xs font-semibold rounded bg-purple-100 text-purple-700">Finance Admin & Management</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-0.5">Configure recipient email addresses for system notifications and alerts.</p>
+                                    </div>
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-brand-pink text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all shadow-sm">
+                                        Save Changes
+                                    </button>
+                                </div>
+                                <div class="p-6 space-y-6">
+                                    <div class="bg-blue-50/70 border border-blue-100 rounded-lg p-4 text-xs sm:text-sm text-blue-900 space-y-2">
+                                        <div class="flex items-start">
+                                            <i class="fas fa-info-circle text-brand-blue mt-0.5 mr-2.5 text-base"></i>
+                                            <div>
+                                                <p class="font-semibold mb-1">Notification Routing Rules:</p>
+                                                <ul class="list-disc list-inside space-y-1 text-xs text-blue-800">
+                                                    <li><strong>Associated HOD:</strong> Requests and status updates automatically go to the requesting staff member's associated HOD (based on department or direct reporting structure).</li>
+                                                    <li><strong>Finance Admin Recipients:</strong> Email notifications for Finance Admins are sent to the addresses configured below.</li>
+                                                    <li><strong>Management Recipients:</strong> Notifications sent when Finance Admin forwards approval requests to Management (includes all registered Management role users plus addresses configured below).</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-800 mb-1">
+                                            Finance Admin Notification Recipient Emails
+                                        </label>
+                                        <p class="text-xs text-gray-500 mb-2">
+                                            Enter email addresses that should receive Finance Admin notifications (e.g. Petty Cash submissions, HOD approvals, settlement requests). Separate multiple emails with commas or line breaks.
+                                        </p>
+                                        @php
+                                            $currentEmails = \App\Models\Setting::get('super_admin_notification_emails', '');
+                                        @endphp
+                                        <textarea name="super_admin_notification_emails" rows="3"
+                                            placeholder="e.g. finance@loopsintegrated.com, admin@loopsintegrated.com"
+                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue sm:text-sm font-mono text-xs sm:text-sm p-3">{{ old('super_admin_notification_emails', $currentEmails) }}</textarea>
+                                    </div>
+
+                                    <!-- Quick Preview of Currently Configured Finance Admin Emails -->
+                                    <div>
+                                        <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Active Finance Admin Notification Recipients</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            @php
+                                                $activeList = \App\Notifications\PettyCashNotification::getConfiguredSuperAdminEmails();
+                                            @endphp
+                                            @forelse($activeList as $email)
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                                                    <i class="fas fa-envelope mr-1.5 text-purple-500"></i>
+                                                    {{ $email }}
+                                                </span>
+                                            @empty
+                                                <span class="text-xs text-gray-400 italic">No Finance Admin emails configured.</span>
+                                            @endforelse
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-4 border-t border-gray-200">
+                                        <label class="block text-sm font-semibold text-gray-800 mb-1">
+                                            Management Notification Recipient Emails
+                                        </label>
+                                        <p class="text-xs text-gray-500 mb-2">
+                                            Enter email addresses that should receive notifications when Finance Admin sends a Petty Cash approval request to Management. Users with the <strong class="text-purple-700">Management</strong> role in the system are automatically included. Separate multiple emails with commas or line breaks.
+                                        </p>
+                                        @php
+                                            $currentManagementEmails = \App\Models\Setting::get('management_notification_emails', '');
+                                        @endphp
+                                        <textarea name="management_notification_emails" rows="3"
+                                            placeholder="e.g. management@loopsintegrated.com, director@loopsintegrated.com"
+                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue sm:text-sm font-mono text-xs sm:text-sm p-3">{{ old('management_notification_emails', $currentManagementEmails) }}</textarea>
+                                    </div>
+
+                                    <!-- Quick Preview of Currently Active Management Emails -->
+                                    <div>
+                                        <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Active Management Notification Recipients</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            @php
+                                                $activeManagementList = \App\Notifications\PettyCashNotification::getConfiguredManagementEmails();
+                                            @endphp
+                                            @forelse($activeManagementList as $mEmail)
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                                    <i class="fas fa-user-tie mr-1.5 text-indigo-500"></i>
+                                                    {{ $mEmail }}
+                                                </span>
+                                            @empty
+                                                <span class="text-xs text-gray-400 italic">No Management emails configured or Management users registered.</span>
+                                            @endforelse
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                    
+                    <!-- Departments Management Section -->
+                    @if(auth()->user()->hasAdminPrivileges() || auth()->user()->hasRole('IT Admin'))
+                    <section id="section-departments" class="settings-section hidden space-y-6">
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">Departments</h3>
+                                    <p class="text-xs text-gray-500">Manage company departments, business units, and department groups.</p>
+                                </div>
+                                <button type="button" onclick="document.getElementById('addDepartmentModal').classList.remove('hidden')"
+                                    class="px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all flex items-center shadow-sm">
+                                    <i class="fas fa-plus mr-2"></i> Add Department
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                                                <th class="py-3 px-4">Department Name</th>
+                                                <th class="py-3 px-4">Group</th>
+                                                <th class="py-3 px-4">Assigned Users</th>
+                                                <th class="py-3 px-4">Status</th>
+                                                <th class="py-3 px-4 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-100 text-sm">
+                                            @forelse($departmentsList as $deptItem)
+                                                @php
+                                                    $userCount = \App\Models\User::where('department', $deptItem->name)->count();
+                                                @endphp
+                                                <tr class="hover:bg-gray-50/50 transition-all">
+                                                    <td class="py-3 px-4 font-semibold text-gray-800 flex items-center">
+                                                        <span class="w-2.5 h-2.5 rounded-full {{ $deptItem->status === 'active' ? 'bg-green-500' : 'bg-gray-400' }} mr-2.5"></span>
+                                                        {{ $deptItem->name }}
+                                                    </td>
+                                                    <td class="py-3 px-4">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                                            {{ $deptItem->group ?: 'General' }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 px-4 text-gray-600">
+                                                        <span class="font-medium text-gray-700">{{ $userCount }}</span> {{ Str::plural('user', $userCount) }}
+                                                    </td>
+                                                    <td class="py-3 px-4">
+                                                        <span class="px-2.5 py-1 text-xs font-medium rounded-full {{ $deptItem->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                                            {{ ucfirst($deptItem->status) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 px-4 text-right space-x-2">
+                                                        <button type="button" onclick="editDepartment('{{ route('settings.updateDepartment', $deptItem) }}', '{{ addslashes($deptItem->name) }}', '{{ addslashes($deptItem->group) }}', '{{ $deptItem->status }}')"
+                                                            class="text-brand-blue hover:text-brand-purple transition-colors font-medium">
+                                                            <i class="fas fa-edit mr-1"></i> Edit
+                                                        </button>
+                                                        <form action="{{ route('settings.destroyDepartment', $deptItem) }}" method="POST" class="inline-block"
+                                                            onsubmit="return confirm('Are you sure you want to delete the department {{ addslashes($deptItem->name) }}?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors font-medium">
+                                                                <i class="fas fa-trash mr-1"></i> Delete
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="5" class="py-6 text-center text-gray-400">
+                                                        No departments found. Click "Add Department" to create one.
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Department Modal -->
+                        <div id="addDepartmentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+                            <div class="relative top-20 mx-auto p-6 border w-96 shadow-lg rounded-xl bg-white">
+                                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-800">Add Department</h3>
+                                    <button type="button" onclick="document.getElementById('addDepartmentModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <form action="{{ route('settings.storeDepartment') }}" method="POST" class="mt-4 space-y-4">
+                                    @csrf
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Department Name *</label>
+                                        <input type="text" name="name" required placeholder="e.g. Creative, Tech, AM" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Department Group *</label>
+                                        <input type="text" name="group" list="dept-groups" required placeholder="e.g. SBU, Sales, Operations" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                        <datalist id="dept-groups">
+                                            <option value="SBU">
+                                            <option value="Sales">
+                                            <option value="Operations">
+                                            <option value="Support">
+                                            <option value="Management">
+                                        </datalist>
+                                        <p class="text-xs text-gray-400 mt-1">Select an existing group or type a new one.</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                        <select name="status" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex justify-end gap-2 pt-2">
+                                        <button type="button" onclick="document.getElementById('addDepartmentModal').classList.add('hidden')"
+                                            class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-md hover:bg-brand-purple">
+                                            Save Department
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Edit Department Modal -->
+                        <div id="editDepartmentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+                            <div class="relative top-20 mx-auto p-6 border w-96 shadow-lg rounded-xl bg-white">
+                                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-800">Edit Department</h3>
+                                    <button type="button" onclick="document.getElementById('editDepartmentModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <form id="editDepartmentForm" action="" method="POST" class="mt-4 space-y-4">
+                                    @csrf
+                                    @method('PUT')
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Department Name *</label>
+                                        <input type="text" name="name" id="edit_dept_name" required class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Department Group *</label>
+                                        <input type="text" name="group" id="edit_dept_group" list="edit-dept-groups" required class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                        <datalist id="edit-dept-groups">
+                                            <option value="SBU">
+                                            <option value="Sales">
+                                            <option value="Operations">
+                                            <option value="Support">
+                                            <option value="Management">
+                                        </datalist>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                        <select name="status" id="edit_dept_status" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex justify-end gap-2 pt-2">
+                                        <button type="button" onclick="document.getElementById('editDepartmentModal').classList.add('hidden')"
+                                            class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-md hover:bg-brand-purple">
+                                            Update Department
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                    @endif
+
+                    <!-- Maintenance Mode Section -->
+                    @if(auth()->user()->hasAdminPrivileges() || auth()->user()->hasRole('IT Admin'))
+                    <section id="section-maintenance" class="settings-section hidden space-y-6">
+                        <form action="{{ route('settings.updateMaintenance') }}" method="POST">
+                            @csrf
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                    <h3 class="text-lg font-bold text-gray-800">Maintenance Mode</h3>
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-brand-pink text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all">
+                                        Save Changes
+                                    </button>
+                                </div>
+                                <div class="p-6">
+                                    <div class="max-w-xl">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">System Maintenance Status</label>
+                                        @php $currentMode = \App\Models\Setting::get('maintenance_mode', 0); @endphp
+                                        <select name="maintenance_mode" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                            <option value="0" {{ $currentMode == 0 ? 'selected' : '' }}>Active (Normal Operation - Everyone Allowed)</option>
+                                            <option value="1" {{ $currentMode == 1 ? 'selected' : '' }}>Admin Maintenance Mode (Block Standard Roles, Allow Finance Admin & IT Admin)</option>
+                                            @if(auth()->user()->hasRole('IT Admin'))
+                                                <option value="2" {{ $currentMode == 2 ? 'selected' : '' }}>Full IT Maintenance Mode (Block All Roles Except IT Admin)</option>
+                                            @endif
+                                        </select>
+                                        <div class="text-xs text-gray-600 mt-3 space-y-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                            <p><strong>• Active:</strong> All users can log in and use the system.</p>
+                                            <p><strong>• Admin Maintenance Mode:</strong> Standard roles are blocked from logging in. Both Finance Admins and IT Admins can access.</p>
+                                            @if(auth()->user()->hasRole('IT Admin'))
+                                                <p><strong>• Full IT Maintenance Mode:</strong> All roles except IT Admins are blocked (including Finance Admins).</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                    @endif
+
+                    <!-- Expense Categories Section -->
+                    <section id="section-expense-categories" class="settings-section hidden space-y-6">
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">Expense Categories</h3>
+                                    <p class="text-xs text-gray-500">Manage category classifications for company expenses.</p>
+                                </div>
+                                <button onclick="document.getElementById('addExpenseCategoryModal').classList.remove('hidden')"
+                                    class="px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all flex items-center">
+                                    <i class="fas fa-plus mr-2"></i> Add Expense Category
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                                                <th class="py-3 px-4">Name</th>
+                                                <th class="py-3 px-4">Description</th>
+                                                <th class="py-3 px-4">Status</th>
+                                                <th class="py-3 px-4 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-100 text-sm">
+                                            @forelse($expenseCategories as $category)
+                                                <tr class="hover:bg-gray-50/50 transition-all">
+                                                    <td class="py-3 px-4 font-semibold text-gray-800">{{ $category->name }}</td>
+                                                    <td class="py-3 px-4 text-gray-600">{{ $category->description ?: '-' }}</td>
+                                                    <td class="py-3 px-4">
+                                                        <span class="px-2.5 py-1 text-xs font-medium rounded-full {{ $category->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                                            {{ ucfirst($category->status) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 px-4 text-right space-x-2">
+                                                        <button onclick="editExpenseCategory('{{ route('settings.updateExpenseCategory', $category) }}', '{{ addslashes($category->name) }}', '{{ addslashes($category->description ?? '') }}', '{{ $category->status }}')"
+                                                            class="text-brand-blue hover:text-brand-purple transition-colors">
+                                                            <i class="fas fa-edit"></i> Edit
+                                                        </button>
+                                                        <form action="{{ route('settings.destroyExpenseCategory', $category) }}" method="POST" class="inline-block"
+                                                            onsubmit="return confirm('Are you sure you want to delete this expense category?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
+                                                                <i class="fas fa-trash"></i> Delete
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="4" class="py-6 text-center text-gray-400">
+                                                        No expense categories found. Click "Add Expense Category" to create one.
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Expense Category Modal -->
+                        <div id="addExpenseCategoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+                            <div class="relative top-20 mx-auto p-6 border w-96 shadow-lg rounded-xl bg-white">
+                                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-800">Add Expense Category</h3>
+                                    <button onclick="document.getElementById('addExpenseCategoryModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <form action="{{ route('settings.storeExpenseCategory') }}" method="POST" class="mt-4 space-y-4">
+                                    @csrf
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Category Name *</label>
+                                        <input type="text" name="name" required class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                        <textarea name="description" rows="3" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                        <select name="status" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex justify-end gap-2 pt-2">
+                                        <button type="button" onclick="document.getElementById('addExpenseCategoryModal').classList.add('hidden')"
+                                            class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-md hover:bg-brand-purple">
+                                            Save Category
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Edit Expense Category Modal -->
+                        <div id="editExpenseCategoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+                            <div class="relative top-20 mx-auto p-6 border w-96 shadow-lg rounded-xl bg-white">
+                                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-800">Edit Expense Category</h3>
+                                    <button onclick="document.getElementById('editExpenseCategoryModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <form id="editExpenseCategoryForm" action="" method="POST" class="mt-4 space-y-4">
+                                    @csrf
+                                    @method('PUT')
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Category Name *</label>
+                                        <input type="text" name="name" id="edit_exp_cat_name" required class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                        <textarea name="description" id="edit_exp_cat_description" rows="3" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                        <select name="status" id="edit_exp_cat_status" class="w-full rounded-md border-gray-300 focus:border-brand-blue focus:ring-brand-blue sm:text-sm">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex justify-end gap-2 pt-2">
+                                        <button type="button" onclick="document.getElementById('editExpenseCategoryModal').classList.add('hidden')"
+                                            class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-md hover:bg-brand-purple">
+                                            Update Category
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Workflow Webhook Section -->
+                    @php
+                        $webhookService = app(\App\Services\WorkflowWebhookService::class);
+                        $envUrl = env('WORKFLOW_WEBHOOK_URL');
+                        $dbUrl = \App\Models\Setting::get('workflow_webhook_url');
+                        $activeUrl = $webhookService->getWebhookUrl();
+                        $hasSecret = !empty($webhookService->getWebhookSecret());
+                    @endphp
+                    <section id="section-webhook" class="settings-section space-y-6 hidden">
+                        <!-- Overview Header -->
+                        <div class="bg-gradient-to-r from-purple-800 to-indigo-900 rounded-xl shadow-md p-6 text-white">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white mb-2">
+                                        <i class="fas fa-bolt mr-1.5 text-yellow-300"></i> Automated Real-Time Webhook
+                                    </div>
+                                    <h3 class="text-xl font-bold">Workflow System Webhook</h3>
+                                    <p class="text-purple-100 text-sm mt-1 max-w-2xl">
+                                        Automatically dispatches an HTTP POST request to your workflow system whenever a job number is generated or updated, passing the <span class="font-semibold text-yellow-200">Job Number</span>, <span class="font-semibold text-yellow-200">Brand Name</span>, customer, and deal details.
+                                    </p>
+                                </div>
+                                <div class="hidden sm:block text-right">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {{ $activeUrl ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30' }}">
+                                        <span class="w-2 h-2 rounded-full mr-2 {{ $activeUrl ? 'bg-emerald-400' : 'bg-amber-400' }}"></span>
+                                        {{ $activeUrl ? 'Active & Configured' : 'URL Not Configured' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuration Form Card -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                <div>
+                                    <h4 class="text-base font-bold text-gray-800">Webhook Connection</h4>
+                                    <p class="text-xs text-gray-500 mt-0.5">Configure via <code>.env</code> file (recommended) or manage here</p>
+                                </div>
+                            </div>
+                            <form action="{{ route('settings.webhook.update') }}" method="POST" class="p-6 space-y-4">
+                                @csrf
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                        Workflow Webhook URL
+                                    </label>
+                                    <input type="url" name="workflow_webhook_url" 
+                                        value="{{ old('workflow_webhook_url', $envUrl ?: $dbUrl) }}" 
+                                        placeholder="https://your-workflow-system.com/api/webhook"
+                                        class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-brand-purple focus:border-brand-purple">
+                                    <div class="mt-1.5 flex items-center text-xs text-gray-500 space-x-2">
+                                        @if($envUrl)
+                                            <span class="inline-flex items-center text-emerald-600 font-medium">
+                                                <i class="fas fa-check-circle mr-1"></i> Configured in .env file (<code>WORKFLOW_WEBHOOK_URL</code>)
+                                            </span>
+                                        @else
+                                            <span>Tip: You can also define <code>WORKFLOW_WEBHOOK_URL=https://...</code> directly in your <code>crm/.env</code> file.</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                        Webhook Secret Token (Optional HMAC-SHA256)
+                                    </label>
+                                    <input type="text" name="workflow_webhook_secret" 
+                                        value="{{ old('workflow_webhook_secret', env('WORKFLOW_WEBHOOK_SECRET') ?: \App\Models\Setting::get('workflow_webhook_secret')) }}" 
+                                        placeholder="Optional secret token for verifying webhook signatures"
+                                        class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-brand-purple focus:border-brand-purple">
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        When set, each webhook request includes an <code>X-Webhook-Signature</code> header generated via <code>hash_hmac('sha256', body, secret)</code>.
+                                    </p>
+                                </div>
+
+                                <div class="pt-2 flex justify-between items-center">
+                                    <button type="submit" 
+                                        class="px-5 py-2.5 bg-brand-purple text-white text-sm font-bold rounded-lg hover:opacity-90 transition-all shadow-sm">
+                                        <i class="fas fa-save mr-1.5"></i> Save Settings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Test Webhook Card -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 space-y-4">
+                            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                                <div>
+                                    <h4 class="text-base font-bold text-gray-800">Test Webhook Delivery</h4>
+                                    <p class="text-xs text-gray-500">Send an immediate test payload to your workflow endpoint to verify connectivity.</p>
+                                </div>
+                                <form action="{{ route('settings.webhook.test') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" {{ empty($activeUrl) ? 'disabled' : '' }}
+                                        class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm inline-flex items-center">
+                                        <i class="fas fa-paper-plane mr-2"></i> Send Test Webhook Ping
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- CLI command hint -->
+                            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-700 flex items-center justify-between">
+                                <span><i class="fas fa-terminal mr-2 text-slate-500"></i><strong>Terminal command:</strong> <code>php artisan webhook:workflow-test</code></span>
+                                <span class="text-[11px] text-slate-400">Supports <code>--job=LOOPS/2026/0001</code> or <code>--deal=12</code></span>
+                            </div>
+
+                            <!-- Payload Preview -->
+                            <div>
+                                <h5 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Dispatched JSON Payload Structure</h5>
+                                <div class="bg-slate-900 text-slate-200 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+<pre>{
+  <span class="text-purple-400">"job_number"</span>: <span class="text-yellow-300">"LOOPS/2026/0001"</span>,
+  <span class="text-purple-400">"brand_name"</span>: <span class="text-emerald-300">"Brand Name"</span>
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                @endif
+
+                @if(auth()->user()->isITAdmin())
+                    <!-- Financial Performance Permissions Section -->
+                    <section id="section-financial-performance-settings" class="settings-section hidden space-y-6">
+                        <form action="{{ route('settings.updateFinancialPerformancePermissions') }}" method="POST">
+                            @csrf
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                    <div>
+                                        <h3 class="text-lg font-bold text-gray-800">Financial Performance Dashboard Visibility</h3>
+                                        <p class="text-xs text-gray-500 mt-0.5">Control which executive roles can view and access the Financial Performance Dashboard</p>
+                                    </div>
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-brand-pink text-white rounded-md hover:bg-brand-purple text-sm font-medium transition-all shadow-sm">
+                                        Save Changes
+                                    </button>
+                                </div>
+                                <div class="p-6 space-y-6">
+                                    <!-- Role: IT Admin (Always Active) -->
+                                    <div class="flex items-start justify-between p-4 rounded-xl border border-emerald-100 bg-emerald-50/50">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                                                <i class="fas fa-shield-alt"></i>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center space-x-2">
+                                                    <h4 class="text-sm font-bold text-gray-800">IT Admin Role</h4>
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Always Enabled</span>
+                                                </div>
+                                                <p class="text-xs text-gray-600 mt-1">IT Admin role has permanent master access to view the dashboard and manage settings.</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-emerald-600 font-bold text-xs mt-1">
+                                            <i class="fas fa-lock mr-1"></i> Locked
+                                        </div>
+                                    </div>
+
+                                    @php
+                                        $financeAdminEnabled = filter_var(\App\Models\Setting::get('financial_performance_finance_admin_enabled', false), FILTER_VALIDATE_BOOLEAN);
+                                        $managementEnabled = filter_var(\App\Models\Setting::get('financial_performance_management_enabled', true), FILTER_VALIDATE_BOOLEAN);
+                                    @endphp
+
+                                    <!-- Role: Finance Admin Toggle -->
+                                    <div class="flex items-start justify-between p-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-all bg-white">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-9 h-9 rounded-lg bg-blue-100 text-brand-blue flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                                                <i class="fas fa-file-invoice-dollar"></i>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center space-x-2">
+                                                    <label for="fp_finance_admin" class="text-sm font-bold text-gray-800 cursor-pointer">Finance Admin Role</label>
+                                                    @if($financeAdminEnabled)
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">Active</span>
+                                                    @else
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600">Disabled</span>
+                                                    @endif
+                                                </div>
+                                                <p class="text-xs text-gray-600 mt-1">
+                                                    Enable to display the Financial Performance navigation tab and grant access to the full dashboard and live CRM sync for all Finance Admin users.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center h-8">
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" name="financial_performance_finance_admin_enabled" id="fp_finance_admin" value="1" {{ $financeAdminEnabled ? 'checked' : '' }} class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Role: Management Role Toggle -->
+                                    <div class="flex items-start justify-between p-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-all bg-white">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                                                <i class="fas fa-user-tie"></i>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center space-x-2">
+                                                    <label for="fp_management" class="text-sm font-bold text-gray-800 cursor-pointer">Management Role</label>
+                                                    @if($managementEnabled)
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">Active</span>
+                                                    @else
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600">Disabled</span>
+                                                    @endif
+                                                </div>
+                                                <p class="text-xs text-gray-600 mt-1">
+                                                    Enable to display the Financial Performance navigation tab and grant access to the full dashboard and live CRM sync for all Management role users.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center h-8">
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" name="financial_performance_management_enabled" id="fp_management" value="1" {{ $managementEnabled ? 'checked' : '' }} class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600 flex items-center space-x-2">
+                                        <i class="fas fa-info-circle text-slate-400"></i>
+                                        <span>Changes apply immediately to navigation menus, direct URL access, and live CRM API endpoints.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                @endif
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        function showSection(id) {
+            // Hide all sections
+            document.querySelectorAll('.settings-section').forEach(s => s.classList.add('hidden'));
+            // Show selected section
+            document.getElementById('section-' + id).classList.remove('hidden');
+
+            // Update buttons
+            document.querySelectorAll('.section-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-brand-blue', 'bg-blue-50');
+            });
+            document.getElementById('btn-' + id).classList.add('ring-2', 'ring-brand-blue', 'bg-blue-50');
+        }
+
+
+        function editTerm(url, content) {
+            const form = document.getElementById('editTermForm');
+            form.action = url;
+            document.getElementById('edit_term_content').value = content;
+            document.getElementById('editTermModal').classList.remove('hidden');
+        }
+
+        function editCurrency(url, code, name, symbol) {
+            const form = document.getElementById('editCurrencyForm');
+            form.action = url;
+            document.getElementById('edit_currency_code').value = code;
+            document.getElementById('edit_currency_name').value = name;
+            document.getElementById('edit_currency_symbol').value = symbol;
+            document.getElementById('editCurrencyModal').classList.remove('hidden');
+        }
+
+        function editExpenseCategory(url, name, description, status) {
+            const form = document.getElementById('editExpenseCategoryForm');
+            form.action = url;
+            document.getElementById('edit_exp_cat_name').value = name;
+            document.getElementById('edit_exp_cat_description').value = description;
+            document.getElementById('edit_exp_cat_status').value = status;
+            document.getElementById('editExpenseCategoryModal').classList.remove('hidden');
+        }
+
+        function editDepartment(url, name, group, status) {
+            const form = document.getElementById('editDepartmentForm');
+            form.action = url;
+            document.getElementById('edit_dept_name').value = name;
+            document.getElementById('edit_dept_group').value = group;
+            document.getElementById('edit_dept_status').value = status;
+            document.getElementById('editDepartmentModal').classList.remove('hidden');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get('section') || 'general';
+            if (document.getElementById('section-' + section)) {
+                showSection(section);
+            } else {
+                showSection('general');
+            }
+        });
+
+        // Update color displays on change
+        document.querySelectorAll('input[type="color"]').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const valInput = e.target.nextElementSibling;
+                if (valInput) valInput.value = e.target.value;
+            });
+        });
+
+
+    </script>
+@endsection

@@ -1,0 +1,170 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Deal extends Model
+{
+    protected $fillable = [
+        'title',
+        'customer_id',
+        'user_id',
+        'customer_name',
+        'customer_email',
+        'customer_phone',
+        'revenue',
+        'contribution',
+        'project_cost',
+        'currency',
+        'stage',
+        'pipeline',
+        'type',
+        'priority',
+        'winning_percentage',
+        'close_date',
+        'job_number',
+        'rejection_reason',
+        'senior_manager'
+    ];
+
+    public const JOB_STAGES = [
+        'Working on pitch',
+        'Pitched',
+        'Objection handling',
+        'Finalizing terms',
+        'Closed Won'
+    ];
+
+    protected static function booted()
+    {
+        static::created(function ($deal) {
+            if (in_array($deal->stage, self::JOB_STAGES) && is_null($deal->job_number)) {
+                $year = date('Y');
+                $idPad = str_pad($deal->id, 4, '0', STR_PAD_LEFT);
+                $deal->job_number = "LOOPS/{$year}/{$idPad}";
+                $deal->saveQuietly();
+
+                app(\App\Services\WorkflowWebhookService::class)->send($deal, 'job.created');
+            } elseif (!empty($deal->job_number)) {
+                app(\App\Services\WorkflowWebhookService::class)->send($deal, 'job.created');
+            }
+        });
+
+        static::updated(function ($deal) {
+            if (!empty($deal->job_number)) {
+                if ($deal->wasChanged('job_number')) {
+                    $event = $deal->getOriginal('job_number') ? 'job.updated' : 'job.created';
+                    app(\App\Services\WorkflowWebhookService::class)->send($deal, $event);
+                } elseif ($deal->wasChanged(['stage', 'title', 'revenue', 'customer_id'])) {
+                    app(\App\Services\WorkflowWebhookService::class)->send($deal, 'job.updated');
+                }
+            }
+        });
+    }
+
+    /**
+     * Dispatch workflow webhook for this deal.
+     */
+    public function sendWorkflowWebhook(string $event = 'job.updated'): array
+    {
+        return app(\App\Services\WorkflowWebhookService::class)->send($this, $event);
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function estimates()
+    {
+        return $this->hasMany(Estimate::class);
+    }
+    public function invoices()
+    {
+        return $this->hasManyThrough(Invoice::class, Estimate::class, 'deal_id', 'quotation_id');
+    }
+
+    public function teamMembers()
+    {
+        return $this->belongsToMany(User::class, 'deal_user')->withPivot('cost_allocation')->withTimestamps();
+    }
+
+    /**
+     * Check if a specific user can edit this deal.
+     * Logic: Super Admin, Management, or Deal Owner. HOD users can edit their own deals and their department managers' deals.
+     * 
+     * @param User|null $user
+     * @return bool
+     */
+    public function canEdit($user = null)
+    {
+        $user = $user ?? auth()->user();
+        if (!$user) return false;
+
+        $hasDuplicatedEstimate = false;
+        if ($this->relationLoaded('estimates')) {
+            $hasDuplicatedEstimate = $this->estimates->where('is_duplicated', true)->isNotEmpty();
+        } elseif ($this->exists) {
+            $hasDuplicatedEstimate = $this->estimates()->where('is_duplicated', true)->exists();
+        }
+
+        if ($hasDuplicatedEstimate) {
+            // Duplicated estimate permissions: Super Admin, Finance Admin, IT Admin, Creator/Owner, and associated HOD only.
+            if ($user->hasRole('Super Admin') || $user->hasRole('Finance Admin') || $user->hasRole('IT Admin')) {
+                return true;
+            }
+            if ($this->user_id === $user->id) {
+                return true;
+            }
+            if ($user->hasRole('HOD')) {
+                if ($this->owner) {
+                    if ($user->department && $this->owner->department === $user->department) {
+                        return true;
+                    }
+                    if ($this->owner->supervisor_id === $user->id) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // 1. Finance Admin, Super Admin, IT Admin or Management override
+        if ($user->hasAdminPrivileges()) {
+            return true;
+        }
+
+        // 2. The Owner (who added the deal)
+        if ($this->user_id === $user->id) {
+            return true;
+        }
+
+        // 3. HOD role users can edit their own department managers' and subordinates' deals
+        if ($user->hasRole('HOD')) {
+            if ($this->owner) {
+                // Deal owner is in the same department as the HOD
+                if ($user->department && $this->owner->department === $user->department) {
+                    return true;
+                }
+                // Deal owner is a direct subordinate of the HOD
+                if ($this->owner->supervisor_id === $user->id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 4. Check by direct supervisor_id (for other roles)
+        if ($this->owner && $this->owner->supervisor_id === $user->id) {
+            return true;
+        }
+
+        return false;
+    }
+}

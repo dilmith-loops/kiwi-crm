@@ -1,0 +1,475 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Setting;
+use App\Models\SeniorManager;
+use App\Models\SystemCurrency;
+use App\Models\StandardTerm;
+use App\Models\Target;
+use App\Models\User;
+use App\Models\ExpenseCategory;
+use App\Models\Department;
+use Illuminate\Http\Request;
+
+class SettingController extends Controller
+{
+
+    public function index()
+    {
+        $settings = Setting::all()->groupBy('group');
+        $managers = SeniorManager::all();
+        $terms = StandardTerm::all();
+        $currencies = SystemCurrency::all();
+        $expenseCategories = ExpenseCategory::where('name', '!=', 'IOU')->get();
+        
+        $departmentTargets = Target::where('type', 'department')->get()->keyBy('department');
+        $userTargets = Target::where('type', 'user')->get()->keyBy('user_id');
+        $users = User::all();
+        $departmentsList = Department::orderBy('group')->orderBy('name')->get();
+
+        return view('settings.index', compact('settings', 'managers', 'terms', 'currencies', 'expenseCategories', 'departmentTargets', 'userTargets', 'users', 'departmentsList'));
+    }
+
+    public function updateDepartmentTargets(Request $request)
+    {
+        $request->validate([
+            'targets' => 'array',
+            'targets.*' => 'numeric|min:0'
+        ]);
+
+        if ($request->has('targets')) {
+            foreach ($request->targets as $department => $amount) {
+                Target::updateOrCreate(
+                    ['type' => 'department', 'department' => $department],
+                    ['target_amount' => $amount]
+                );
+            }
+        }
+
+        return redirect()->route('settings.index')->with('success', 'Department targets updated successfully.');
+    }
+
+    public function updateUserTargets(Request $request)
+    {
+        $request->validate([
+            'targets' => 'array',
+            'targets.*' => 'numeric|min:0'
+        ]);
+
+        if ($request->has('targets')) {
+            foreach ($request->targets as $userId => $amount) {
+                Target::updateOrCreate(
+                    ['type' => 'user', 'user_id' => $userId],
+                    ['target_amount' => $amount]
+                );
+            }
+        }
+
+        return redirect()->route('settings.index')->with('success', 'User targets updated successfully.');
+    }
+
+    public function updateGeneral(Request $request)
+    {
+        $data = $request->except('_token');
+
+        foreach ($data as $key => $value) {
+            Setting::set($key, $value);
+        }
+
+        return redirect()->route('settings.index')->with('success', 'General settings updated successfully.');
+    }
+
+    public function updateTax(Request $request)
+    {
+        $request->validate([
+            'sscl_rate' => 'required|numeric|min:0',
+            'vat_rate' => 'required|numeric|min:0',
+        ]);
+
+        Setting::set('sscl_rate', $request->sscl_rate, 'tax');
+        Setting::set('vat_rate', $request->vat_rate, 'tax');
+
+        return redirect()->route('settings.index')->with('success', 'Tax settings updated successfully.');
+    }
+
+    public function storeManager(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'designation' => 'nullable|string|max:255',
+        ]);
+
+        SeniorManager::create($request->only('name', 'designation'));
+
+        return redirect()->route('settings.index')->with('success', 'Senior manager added successfully.');
+    }
+
+    public function destroyManager(SeniorManager $manager)
+    {
+        try {
+            $manager->delete();
+            return redirect()->route('settings.index')->with('success', 'Senior manager removed successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('settings.index')->with('error', 'Cannot delete manager. It may be in use.');
+        }
+    }
+
+    public function updateManager(Request $request, SeniorManager $manager)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'designation' => 'nullable|string|max:255',
+        ]);
+
+        $manager->update($request->only('name', 'designation'));
+
+        return redirect()->route('settings.index')->with('success', 'Senior manager updated successfully.');
+    }
+
+    public function storeTerm(Request $request)
+    {
+        $request->validate([
+            'content' => 'required|string',
+        ]);
+
+        StandardTerm::create($request->only('content'));
+
+        return redirect()->route('settings.index')->with('success', 'Standard term added successfully.');
+    }
+
+    public function destroyTerm(StandardTerm $term)
+    {
+        try {
+            $term->delete();
+            return redirect()->route('settings.index')->with('success', 'Standard term removed successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('settings.index')->with('error', 'Cannot delete term. It may be in use.');
+        }
+    }
+
+    public function updateTerm(Request $request, StandardTerm $term)
+    {
+        $request->validate([
+            'content' => 'required|string',
+        ]);
+
+        $term->update($request->only('content'));
+
+        return redirect()->route('settings.index')->with('success', 'Standard term updated successfully.');
+    }
+    public function storeCurrency(Request $request)
+    {
+        // Role Check (Finance Admin & Management)
+        if (!auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'code' => 'required|string|max:3|unique:system_currencies,code',
+            'name' => 'nullable|string|max:255',
+            'symbol' => 'nullable|string|max:10',
+        ]);
+
+        \App\Models\SystemCurrency::create($request->only('code', 'name', 'symbol'));
+
+        return redirect()->route('settings.index')->with('success', 'Currency added successfully.');
+    }
+
+    public function destroyCurrency(\App\Models\SystemCurrency $currency)
+    {
+        // Role Check (Finance Admin & Management)
+        if (!auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $currency->delete();
+            return redirect()->route('settings.index')->with('success', 'Currency removed successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('settings.index')->with('error', 'Cannot delete currency. It may be in use.');
+        }
+    }
+
+    public function updateCurrency(Request $request, \App\Models\SystemCurrency $currency)
+    {
+        // Role Check (Finance Admin & Management)
+        if (!auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'code' => 'required|string|max:3|unique:system_currencies,code,' . $currency->id,
+            'name' => 'nullable|string|max:255',
+            'symbol' => 'nullable|string|max:10',
+        ]);
+
+        $currency->update($request->only('code', 'name', 'symbol'));
+
+        return redirect()->route('settings.index')->with('success', 'Currency updated successfully.');
+    }
+
+    public function updateMaintenance(Request $request)
+    {
+        $user = auth()->user();
+
+        // Role Check (Finance Admin, Super Admin, Management, or IT Admin)
+        if (!$user->hasRole('IT Admin') && !$user->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action. Only IT Admin and Admins can manage Maintenance Mode.');
+        }
+
+        $request->validate([
+            'maintenance_mode' => 'required|in:0,1,2',
+        ]);
+
+        // Mode 2 (Full IT Maintenance) can only be set by IT Admin
+        if ($request->maintenance_mode == 2 && !$user->hasRole('IT Admin')) {
+            return back()->with('error', 'Only IT Admin can enable Full IT Maintenance Mode.');
+        }
+
+        Setting::set('maintenance_mode', $request->maintenance_mode, 'system');
+
+        return redirect()->route('settings.index')->with('success', 'Maintenance mode status updated successfully.');
+    }
+
+    public function storeExpenseCategory(Request $request)
+    {
+        if (!auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255|unique:expense_categories,name',
+            'description' => 'nullable|string',
+            'status' => 'nullable|string|in:active,inactive',
+        ]);
+
+        ExpenseCategory::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'status' => $request->status ?? 'active',
+        ]);
+
+        return redirect()->route('settings.index')->with('success', 'Expense category created successfully.');
+    }
+
+    public function updateExpenseCategory(Request $request, ExpenseCategory $expenseCategory)
+    {
+        if (!auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255|unique:expense_categories,name,' . $expenseCategory->id,
+            'description' => 'nullable|string',
+            'status' => 'required|string|in:active,inactive',
+        ]);
+
+        $expenseCategory->update($request->only('name', 'description', 'status'));
+
+        return redirect()->route('settings.index')->with('success', 'Expense category updated successfully.');
+    }
+
+    public function destroyExpenseCategory(ExpenseCategory $expenseCategory)
+    {
+        if (!auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $expenseCategory->delete();
+            return redirect()->route('settings.index')->with('success', 'Expense category removed successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('settings.index')->with('error', 'Cannot delete expense category.');
+        }
+    }
+
+    public function updateNotifications(Request $request)
+    {
+        // Role Check (Finance Admin & Management)
+        if (!auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'super_admin_notification_emails' => 'nullable|string',
+            'management_notification_emails' => 'nullable|string',
+        ]);
+
+        $invalidEmails = [];
+        $processEmails = function ($input) use (&$invalidEmails) {
+            $parts = preg_split('/[\r\n,;]+/', (string)$input);
+            $valid = [];
+            foreach ($parts as $part) {
+                $email = trim($part);
+                if (empty($email)) {
+                    continue;
+                }
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $valid[] = strtolower($email);
+                } else {
+                    $invalidEmails[] = $email;
+                }
+            }
+            return implode(', ', array_unique($valid));
+        };
+
+        $cleanSuperAdmin = $processEmails($request->input('super_admin_notification_emails', ''));
+        $cleanManagement = $processEmails($request->input('management_notification_emails', ''));
+
+        if (!empty($invalidEmails)) {
+            return redirect()->route('settings.index')
+                ->with('error', 'The following email addresses are invalid: ' . implode(', ', $invalidEmails));
+        }
+
+        Setting::set('super_admin_notification_emails', $cleanSuperAdmin, 'notifications');
+        Setting::set('management_notification_emails', $cleanManagement, 'notifications');
+
+        return redirect()->route('settings.index')->with('success', 'Notification recipient emails updated successfully.');
+    }
+
+    public function storeDepartment(Request $request)
+    {
+        if (!auth()->user()->hasRole('IT Admin') && !auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action. Only IT Admin and Admins can manage departments.');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:100|unique:departments,name',
+            'group' => 'required|string|max:100',
+            'status' => 'nullable|string|in:active,inactive',
+        ]);
+
+        Department::create([
+            'name' => trim($request->name),
+            'group' => trim($request->group),
+            'status' => $request->status ?? 'active',
+        ]);
+
+        return redirect()->route('settings.index', ['section' => 'departments'])
+            ->with('success', 'Department created successfully.')
+            ->with('section', 'departments');
+    }
+
+    public function updateDepartment(Request $request, Department $department)
+    {
+        if (!auth()->user()->hasRole('IT Admin') && !auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action. Only IT Admin and Admins can manage departments.');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:100|unique:departments,name,' . $department->id,
+            'group' => 'required|string|max:100',
+            'status' => 'required|string|in:active,inactive',
+        ]);
+
+        $oldName = $department->name;
+        $newName = trim($request->name);
+
+        $department->update([
+            'name' => $newName,
+            'group' => trim($request->group),
+            'status' => $request->status,
+        ]);
+
+        // If department name changed, cascade update users assigned to this department
+        if ($oldName !== $newName) {
+            User::where('department', $oldName)->update(['department' => $newName]);
+            Target::where('type', 'department')->where('department', $oldName)->update(['department' => $newName]);
+        }
+
+        return redirect()->route('settings.index', ['section' => 'departments'])
+            ->with('success', 'Department updated successfully.')
+            ->with('section', 'departments');
+    }
+
+    public function destroyDepartment(Department $department)
+    {
+        if (!auth()->user()->hasRole('IT Admin') && !auth()->user()->hasAdminPrivileges()) {
+            abort(403, 'Unauthorized action. Only IT Admin and Admins can manage departments.');
+        }
+
+        $assignedUsersCount = User::where('department', $department->name)->count();
+        if ($assignedUsersCount > 0) {
+            return redirect()->route('settings.index', ['section' => 'departments'])
+                ->with('error', "Cannot delete department '{$department->name}' because {$assignedUsersCount} user(s) are assigned to it. You can change its status to Inactive instead.")
+                ->with('section', 'departments');
+        }
+
+        $department->delete();
+
+        return redirect()->route('settings.index', ['section' => 'departments'])
+            ->with('success', 'Department deleted successfully.')
+            ->with('section', 'departments');
+    }
+
+    public function updateWebhook(Request $request)
+    {
+        if (!auth()->user()->hasAdminPrivileges() && !auth()->user()->hasRole('IT Admin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'workflow_webhook_url' => 'nullable|url|max:500',
+            'workflow_webhook_secret' => 'nullable|string|max:255',
+        ]);
+
+        Setting::set('workflow_webhook_url', $request->input('workflow_webhook_url'), 'integrations');
+        Setting::set('workflow_webhook_secret', $request->input('workflow_webhook_secret'), 'integrations');
+
+        return redirect()->route('settings.index', ['section' => 'webhook'])
+            ->with('success', 'Workflow webhook settings updated successfully.')
+            ->with('section', 'webhook');
+    }
+
+    public function testWorkflowWebhook(Request $request, \App\Services\WorkflowWebhookService $webhookService)
+    {
+        if (!auth()->user()->hasAdminPrivileges() && !auth()->user()->hasRole('IT Admin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $url = $request->input('workflow_webhook_url') ?: $webhookService->getWebhookUrl();
+
+        if (empty($url)) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'No webhook URL configured.'], 422);
+            }
+            return back()->with('error', 'No webhook URL configured.')->with('section', 'webhook');
+        }
+
+        $result = $webhookService->sendTest($url);
+
+        if ($request->wantsJson()) {
+            return response()->json($result);
+        }
+
+        if ($result['success']) {
+            return back()->with('success', $result['message'])->with('section', 'webhook');
+        } else {
+            return back()->with('error', $result['message'])->with('section', 'webhook');
+        }
+    }
+
+    /**
+     * Update access permissions for the Financial Performance Dashboard.
+     * Restricted to IT Admin only.
+     */
+    public function updateFinancialPerformancePermissions(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->isITAdmin()) {
+            abort(403, 'Unauthorized action. Only IT Admin can configure Financial Performance permissions.');
+        }
+
+        $financeAdminEnabled = $request->boolean('financial_performance_finance_admin_enabled');
+        $managementEnabled = $request->boolean('financial_performance_management_enabled');
+
+        Setting::set('financial_performance_finance_admin_enabled', $financeAdminEnabled ? '1' : '0', 'permissions');
+        Setting::set('financial_performance_management_enabled', $managementEnabled ? '1' : '0', 'permissions');
+
+        return redirect()->route('settings.index', ['section' => 'financial-performance-settings'])
+            ->with('success', 'Financial Performance permissions updated successfully.')
+            ->with('section', 'financial-performance-settings');
+    }
+}
