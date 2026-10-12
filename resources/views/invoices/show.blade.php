@@ -104,7 +104,7 @@
         <!-- Header with Logo for Proforma -->
         <div class="flex justify-between items-center mb-[20px] mt-2 invoice-header">
             <div class="w-1/3">
-                <img src="{{ asset('images/logo_loops.png') }}" alt="Loops Logo" class="h-12 w-auto">
+                <img src="{{ asset('images/logo_loops.png') }}" alt="Creative Kiwi" class="h-12 w-auto">
             </div>
             <div class="w-1/3 flex justify-center">
                 <div class="border border-black px-12 py-2 bg-white font-bold text-[17px] uppercase tracking-wide whitespace-nowrap">

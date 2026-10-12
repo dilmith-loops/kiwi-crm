@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Invoice System</title>
+    <title>Creative Kiwi</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     
     <!-- PWA Web App Meta Tags -->
@@ -14,7 +14,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Loops CRM">
+    <meta name="apple-mobile-web-app-title" content="Creative Kiwi">
     <link rel="apple-touch-icon" href="{{ asset('images/pwa-icon-192.png') }}">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -129,7 +129,7 @@
         @unless(View::hasSection('no_sidebar'))
         <aside class="w-64 bg-dark text-white flex-shrink-0 hidden md:flex flex-col">
             <div class="p-4 flex items-center justify-center h-20 border-b border-gray-700">
-                <img src="{{ asset('images/logo_loops_light.png') }}" alt="Loops Integrated" class="h-12 w-auto">
+                <img src="{{ asset('images/logo_loops_light.png') }}" alt="Creative Kiwi" class="h-12 w-auto">
             </div>
             <nav class="flex-1 px-2 py-4 space-y-2 overflow-y-auto">
                 <a href="{{ route('dashboard') }}"
@@ -251,7 +251,7 @@
                class="fixed inset-y-0 left-0 z-50 w-72 bg-dark text-white flex flex-col md:hidden shadow-2xl"
                style="display: none;">
             <div class="p-4 flex items-center justify-between h-20 border-b border-gray-700">
-                <img src="{{ asset('images/logo_loops_light.png') }}" alt="Loops Integrated" class="h-10 w-auto">
+                <img src="{{ asset('images/logo_loops_light.png') }}" alt="Creative Kiwi" class="h-10 w-auto">
                 <button @click="mobileSidebarOpen = false" class="text-gray-400 hover:text-white p-2 rounded-lg focus:outline-none">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -328,7 +328,7 @@
             <div class="px-3 pb-3">
                 <button type="button" class="pwa-install-btn flex w-full items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-brand-purple to-brand-pink text-white text-sm font-bold rounded-xl shadow-md active:scale-95 transition-all" title="Install App">
                     <i class="fas fa-download text-base"></i>
-                    <span>Install Loops App</span>
+                    <span>Install Creative Kiwi App</span>
                 </button>
             </div>
             <div class="p-4 border-t border-gray-700 bg-gray-900/50">
@@ -373,7 +373,7 @@
                             <i class="fas fa-arrows-rotate text-brand-purple text-xs sm:text-sm"></i>
                             <span class="hidden sm:inline">Refresh</span>
                         </button>
-                        <button type="button" class="pwa-install-btn inline-flex px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-gradient-to-r from-brand-purple to-brand-pink text-white text-xs font-bold rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all items-center gap-1.5" title="Install Loops CRM">
+                        <button type="button" class="pwa-install-btn inline-flex px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-gradient-to-r from-brand-purple to-brand-pink text-white text-xs font-bold rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all items-center gap-1.5" title="Install Creative Kiwi">
                             <i class="fas fa-download text-xs"></i>
                             <span>Install</span>
                         </button>

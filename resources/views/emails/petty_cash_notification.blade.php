@@ -12,7 +12,7 @@
         <tr>
             <td style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); padding: 24px; text-align: center; color: #ffffff;">
                 <div style="margin-bottom: 12px;">
-                    <img src="{{ url('images/logo_loops_light.png') }}" alt="Loops Integrated" style="height: 46px; width: auto; display: inline-block;">
+                    <img src="{{ url('images/logo_loops_light.png') }}" alt="Creative Kiwi" style="height: 46px; width: auto; display: inline-block;">
                 </div>
                 <h1 style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #ffffff;">
                     LOOPS FINANCE

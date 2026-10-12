@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify OTP & Reset Password - Loops Integrated</title>
+    <title>Verify OTP & Reset Password - Creative Kiwi</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     
     <!-- PWA Web App Meta Tags -->
@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Loops CRM">
+    <meta name="apple-mobile-web-app-title" content="Creative Kiwi">
     <link rel="apple-touch-icon" href="{{ asset('images/pwa-icon-192.png') }}">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,7 +36,7 @@
     <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md border border-white/20 transform transition-all duration-300 hover:shadow-white/10 my-auto">
         <div class="flex flex-col items-center mb-6 sm:mb-8">
             <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-sm mb-4 sm:mb-6">
-                <img src="{{ asset('images/logo_loops.png') }}" alt="Loops Integrated" class="h-12 sm:h-16 w-auto">
+                <img src="{{ asset('images/logo_loops.png') }}" alt="Creative Kiwi" class="h-12 sm:h-16 w-auto">
             </div>
             <h2 class="text-2xl sm:text-3xl font-black text-gray-800 tracking-tight text-center">Enter Verification OTP</h2>
             <p class="text-gray-500 mt-2 text-xs sm:text-sm font-medium text-center">Check your email inbox for the 6-digit OTP code and choose your new password.</p>

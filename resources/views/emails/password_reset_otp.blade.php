@@ -11,13 +11,13 @@
         <tr>
             <td style="background: linear-gradient(135deg, #ff0878 0%, #8035ca 50%, #0057be 100%); padding: 30px 25px; text-align: center;">
                 <div style="margin-bottom: 12px;">
-                    <img src="{{ url('images/logo_loops_light.png') }}" alt="Loops Integrated" style="height: 48px; width: auto; display: inline-block;">
+                    <img src="{{ url('images/logo_loops_light.png') }}" alt="Creative Kiwi" style="height: 48px; width: auto; display: inline-block;">
                 </div>
                 <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">
                     Password Reset Request
                 </h1>
                 <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0 0; font-size: 12px;">
-                    Loops Integrated System Security
+                    Creative Kiwi System Security
                 </p>
             </td>
         </tr>
@@ -29,7 +29,7 @@
                     Hello {{ $user->name }},
                 </p>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 25px;">
-                    We received a request to reset your password for your Loops Integrated account. Use the 6-digit verification code below to proceed with resetting your password:
+                    We received a request to reset your password for your Creative Kiwi account. Use the 6-digit verification code below to proceed with resetting your password:
                 </p>
 
                 <!-- OTP Code Box -->
@@ -55,7 +55,7 @@
         <!-- Footer -->
         <tr>
             <td style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
-                &copy; {{ date('Y') }} Loops Integrated. All rights reserved.
+                &copy; {{ date('Y') }} Creative Kiwi. All rights reserved.
             </td>
         </tr>
     </table>

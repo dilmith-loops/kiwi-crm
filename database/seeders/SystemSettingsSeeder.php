@@ -12,7 +12,7 @@ class SystemSettingsSeeder extends Seeder
     public function run(): void
     {
         // Company Details
-        Setting::set('company_name', 'Loops Digital (Pvt) Ltd', 'company');
+        Setting::set('company_name', 'Creative Kiwi', 'company');
         Setting::set('company_address_1', '291, Soloman Terrace,', 'company');
         Setting::set('company_address_2', 'Colombo 05, Sri Lanka.', 'company');
         Setting::set('company_phone', '+94 112 581 689', 'company');

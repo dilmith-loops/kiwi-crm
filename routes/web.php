@@ -27,9 +27,9 @@ Route::post('reset-password/otp', [AuthController::class, 'resetPasswordWithOtp'
 // Dynamic PWA Manifest & Service Worker Routes for Hostinger / LiteSpeed
 Route::get('manifest.json', function () {
     return response()->json([
-        'name' => 'Loops Integrated System',
-        'short_name' => 'Loops CRM',
-        'description' => 'Loops Integrated CRM, Petty Cash & Invoicing Management System',
+        'name' => 'Creative Kiwi',
+        'short_name' => 'Creative Kiwi',
+        'description' => 'Creative Kiwi CRM, Petty Cash & Invoicing Management System',
         'id' => url('/'),
         'start_url' => url('/'),
         'scope' => url('/'),

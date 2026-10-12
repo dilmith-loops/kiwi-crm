@@ -2,9 +2,9 @@
 <div id="pwa-mobile-banner" class="hidden fixed bottom-4 inset-x-3 sm:inset-x-6 z-50 md:hidden bg-gray-900/95 backdrop-blur-md border border-gray-700/80 text-white rounded-2xl p-3.5 shadow-2xl transition-all duration-300 transform translate-y-0">
     <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-            <img src="{{ asset('images/pwa-icon-192.png') }}" alt="Loops CRM" class="w-11 h-11 rounded-xl shadow-md border border-white/10 flex-shrink-0 object-cover">
+            <img src="{{ asset('images/pwa-icon-192.png') }}" alt="Creative Kiwi" class="w-11 h-11 rounded-xl shadow-md border border-white/10 flex-shrink-0 object-cover">
             <div class="min-w-0">
-                <p class="text-sm font-bold text-white leading-tight truncate">Install Loops CRM</p>
+                <p class="text-sm font-bold text-white leading-tight truncate">Install Creative Kiwi</p>
                 <p class="text-xs text-gray-300 mt-0.5 truncate">Fast home screen access & standalone view</p>
             </div>
         </div>
@@ -28,10 +28,10 @@
         </button>
 
         <div class="flex items-center gap-3 mb-4">
-            <img src="{{ asset('images/pwa-icon-192.png') }}" alt="Loops CRM" class="w-12 h-12 rounded-xl shadow border border-gray-100 object-cover">
+            <img src="{{ asset('images/pwa-icon-192.png') }}" alt="Creative Kiwi" class="w-12 h-12 rounded-xl shadow border border-gray-100 object-cover">
             <div>
                 <h3 class="text-base font-black text-gray-800">Install on iPhone / iPad</h3>
-                <p class="text-xs text-gray-500">Add Loops CRM to your home screen</p>
+                <p class="text-xs text-gray-500">Add Creative Kiwi to your home screen</p>
             </div>
         </div>
 
@@ -79,7 +79,7 @@
         </button>
 
         <div class="flex items-center gap-3 mb-4">
-            <img src="{{ asset('images/pwa-icon-192.png') }}" alt="Loops CRM" class="w-12 h-12 rounded-xl shadow border border-gray-100 object-cover">
+            <img src="{{ asset('images/pwa-icon-192.png') }}" alt="Creative Kiwi" class="w-12 h-12 rounded-xl shadow border border-gray-100 object-cover">
             <div>
                 <h3 class="text-base font-black text-gray-800">Install on Android</h3>
                 <p class="text-xs text-gray-500">Google Chrome / Samsung Internet</p>
@@ -129,15 +129,15 @@
         </button>
 
         <div class="flex items-center gap-3 mb-4">
-            <img src="{{ asset('images/pwa-icon-192.png') }}" alt="Loops CRM" class="w-12 h-12 rounded-xl shadow border border-gray-100 object-cover">
+            <img src="{{ asset('images/pwa-icon-192.png') }}" alt="Creative Kiwi" class="w-12 h-12 rounded-xl shadow border border-gray-100 object-cover">
             <div>
-                <h3 class="text-base font-black text-gray-800">Install Loops CRM</h3>
+                <h3 class="text-base font-black text-gray-800">Install Creative Kiwi</h3>
                 <p class="text-xs text-gray-500">Run as a standalone desktop app</p>
             </div>
         </div>
 
         <div class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100 text-xs text-gray-700">
-            <p><span class="font-bold text-gray-900">Chrome / Edge:</span> Click the <i class="fas fa-download text-brand-purple"></i> install icon in your address bar, or click Menu (⋮) &rarr; "Install Loops CRM".</p>
+            <p><span class="font-bold text-gray-900">Chrome / Edge:</span> Click the <i class="fas fa-download text-brand-purple"></i> install icon in your address bar, or click Menu (⋮) &rarr; "Install Creative Kiwi".</p>
             <p><span class="font-bold text-gray-900">Note:</span> Ensure you are accessing via HTTPS for installation to be enabled.</p>
         </div>
 
@@ -276,7 +276,7 @@ window.refreshPwaApp = function(btn) {
 
         // App installed event
         window.addEventListener('appinstalled', function() {
-            console.log('Loops CRM PWA was successfully installed');
+            console.log('Creative Kiwi PWA was successfully installed');
             hideAllInstallUi();
         });
     }

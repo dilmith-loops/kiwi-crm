@@ -27,7 +27,7 @@ class PasswordResetOtpMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Your Password Reset Verification Code - Loops Integrated')
+        return $this->subject('Your Password Reset Verification Code - Creative Kiwi')
                     ->view('emails.password_reset_otp');
     }
 }
