@@ -65,6 +65,13 @@
             display: none;
         }
 
+        /* Prevent FOUC: completely hide native multi-select elements before TomSelect initializes */
+        .filter-form select[multiple]:not(.tomselected),
+        #filter_user:not(.tomselected),
+        #filter_department:not(.tomselected) {
+            display: none !important;
+        }
+
         /* Compact styles for Tom Select inside the filter form */
         .filter-form .ts-wrapper {
             width: auto !important;
@@ -278,7 +285,7 @@
                     <div class="flex items-center gap-2">
                         <label for="filter_user" class="text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">User:</label>
                         <div class="min-w-[150px]">
-                            <select name="filter_user[]" id="filter_user" multiple>
+                            <select name="filter_user[]" id="filter_user" multiple class="hidden" style="display: none;">
                                 @foreach($filterableUsers as $filterUser)
                                     <option value="{{ $filterUser->id }}" {{ is_array(request('filter_user')) && in_array($filterUser->id, request('filter_user')) ? 'selected' : (request('filter_user') == $filterUser->id ? 'selected' : '') }}>
                                         {{ $filterUser->name }}
@@ -294,7 +301,7 @@
                             @php
                                 $selectedDepts = (array)(request('filter_department') ?? request('department') ?? []);
                             @endphp
-                            <select name="filter_department[]" id="filter_department" multiple>
+                            <select name="filter_department[]" id="filter_department" multiple class="hidden" style="display: none;">
                                 @foreach($filterableDepartments as $dept)
                                     <option value="{{ $dept }}" {{ in_array($dept, $selectedDepts) ? 'selected' : '' }}>
                                         {{ $dept }}
@@ -315,6 +322,33 @@
                         @endif
                     </div>
                 </form>
+                <script>
+                    (function() {
+                        function initFilterTomSelects() {
+                            if (typeof TomSelect === 'undefined') return false;
+                            var u = document.getElementById('filter_user');
+                            if (u && !u.tomselect) {
+                                new TomSelect(u, {
+                                    plugins: ['remove_button'],
+                                    placeholder: 'All Users',
+                                    create: false
+                                });
+                            }
+                            var d = document.getElementById('filter_department');
+                            if (d && !d.tomselect) {
+                                new TomSelect(d, {
+                                    plugins: ['remove_button'],
+                                    placeholder: 'All Departments',
+                                    create: false
+                                });
+                            }
+                            return true;
+                        }
+                        if (!initFilterTomSelects()) {
+                            document.addEventListener('DOMContentLoaded', initFilterTomSelects);
+                        }
+                    })();
+                </script>
             </div>
 
             <button onclick="document.getElementById('createDealModal').classList.remove('hidden')"
@@ -1079,16 +1113,18 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize TomSelect for User and Department filters
-            if (document.getElementById('filter_user')) {
-                new TomSelect('#filter_user', {
+            // Initialize TomSelect for User and Department filters if not already initialized
+            var filterUserEl = document.getElementById('filter_user');
+            if (filterUserEl && !filterUserEl.tomselect) {
+                new TomSelect(filterUserEl, {
                     plugins: ['remove_button'],
                     placeholder: 'All Users',
                     create: false
                 });
             }
-            if (document.getElementById('filter_department')) {
-                new TomSelect('#filter_department', {
+            var filterDeptEl = document.getElementById('filter_department');
+            if (filterDeptEl && !filterDeptEl.tomselect) {
+                new TomSelect(filterDeptEl, {
                     plugins: ['remove_button'],
                     placeholder: 'All Departments',
                     create: false
