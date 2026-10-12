@@ -76,17 +76,14 @@ class UserController extends Controller
         $user->supervisor_id = $request->supervisor_id;
         $user->department = $request->department;
 
-        $passwordUpdated = false;
         if ($request->password) {
             $user->password = Hash::make($request->password);
-            $passwordUpdated = true;
+            $this->logAction("Reset password for user: {$user->name}", $user);
         }
 
         $user->save();
         $this->logAction("Updated user: {$user->name}", $user);
-        if ($passwordUpdated) {
-            $this->logAction("Reset password for user: {$user->name}", $user);
-        }
+
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }

@@ -40,7 +40,7 @@ class FinancialPerformanceController extends Controller
     {
         $this->authorizeAccess();
 
-        $this->logAction("Accessed Financial Performance tab");
+        $this->logAction('Accessed Financial Performance tab');
 
         $dashboardData = $this->service->getDashboardData();
 
