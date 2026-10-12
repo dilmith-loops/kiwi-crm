@@ -29,9 +29,9 @@
         }
 
         .ts-wrapper.focus .ts-control {
-            border-color: #8035ca !important;
+            border-color: #15803d !important;
             /* brand-purple */
-            box-shadow: 0 0 0 2px rgba(128, 53, 202, 0.2) !important;
+            box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2) !important;
             outline: none !important;
         }
 
@@ -48,7 +48,7 @@
         }
 
         .ts-dropdown .active {
-            background-color: #8035ca !important;
+            background-color: #15803d !important;
             /* brand-purple */
             color: white !important;
         }
@@ -1179,7 +1179,7 @@
                             title: 'Confirm Stage Change',
                             text: `Are you sure you want to move this deal to "${newStage}"?`,
                             showCancelButton: true,
-                            confirmButtonColor: '#8035ca',
+                            confirmButtonColor: '#15803d',
                             cancelButtonColor: '#d33',
                             confirmButtonText: 'Yes, move it!',
                             cancelButtonText: 'No, cancel'
@@ -1300,24 +1300,24 @@
                     });
 
                     if (totalRevPercent > 100.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total Revenue Percentage cannot exceed 100% (Current: ' + totalRevPercent.toFixed(2) + '%)', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total Revenue Percentage cannot exceed 100% (Current: ' + totalRevPercent.toFixed(2) + '%)', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
                     if (totalConPercent > 100.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total Contribution Percentage cannot exceed 100% (Current: ' + totalConPercent.toFixed(2) + '%)', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total Contribution Percentage cannot exceed 100% (Current: ' + totalConPercent.toFixed(2) + '%)', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
                     if (totalRevAmt > mainRev + 0.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total split revenue (LKR ' + totalRevAmt.toLocaleString() + ') cannot exceed project revenue (LKR ' + mainRev.toLocaleString() + ')', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total split revenue (LKR ' + totalRevAmt.toLocaleString() + ') cannot exceed project revenue (LKR ' + mainRev.toLocaleString() + ')', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
                                         if (totalConAmt > mainCon + 0.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total split contribution (LKR ' + totalConAmt.toLocaleString() + ') cannot exceed total contribution (LKR ' + mainCon.toLocaleString() + ')', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total split contribution (LKR ' + totalConAmt.toLocaleString() + ') cannot exceed total contribution (LKR ' + mainCon.toLocaleString() + ')', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
 
                     if (mainCon > mainRev + 0.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Project Contribution (LKR ' + mainCon.toLocaleString() + ') cannot exceed Project Revenue (LKR ' + mainRev.toLocaleString() + ')', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Project Contribution (LKR ' + mainCon.toLocaleString() + ') cannot exceed Project Revenue (LKR ' + mainRev.toLocaleString() + ')', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
                     rows.forEach((row, index) => {
@@ -1388,24 +1388,24 @@
                     });
 
                     if (totalRevPercent > 100.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total Revenue Percentage cannot exceed 100% (Current: ' + totalRevPercent.toFixed(2) + '%)', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total Revenue Percentage cannot exceed 100% (Current: ' + totalRevPercent.toFixed(2) + '%)', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
                     if (totalConPercent > 100.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total Contribution Percentage cannot exceed 100% (Current: ' + totalConPercent.toFixed(2) + '%)', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total Contribution Percentage cannot exceed 100% (Current: ' + totalConPercent.toFixed(2) + '%)', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
                     if (totalRevAmt > mainRev + 0.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total split revenue (LKR ' + totalRevAmt.toLocaleString() + ') cannot exceed project revenue (LKR ' + mainRev.toLocaleString() + ')', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total split revenue (LKR ' + totalRevAmt.toLocaleString() + ') cannot exceed project revenue (LKR ' + mainRev.toLocaleString() + ')', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
                                         if (totalConAmt > mainCon + 0.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total split contribution (LKR ' + totalConAmt.toLocaleString() + ') cannot exceed total contribution (LKR ' + mainCon.toLocaleString() + ')', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Total split contribution (LKR ' + totalConAmt.toLocaleString() + ') cannot exceed total contribution (LKR ' + mainCon.toLocaleString() + ')', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
 
                     if (mainCon > mainRev + 0.01) {
-                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Project Contribution (LKR ' + mainCon.toLocaleString() + ') cannot exceed Project Revenue (LKR ' + mainRev.toLocaleString() + ')', confirmButtonColor: '#8035ca' });
+                        Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Project Contribution (LKR ' + mainCon.toLocaleString() + ') cannot exceed Project Revenue (LKR ' + mainRev.toLocaleString() + ')', confirmButtonColor: '#15803d' });
                         e.preventDefault(); return false;
                     }
                     rows.forEach((row, index) => {
@@ -1501,11 +1501,11 @@
 
                     if (e.target.classList.contains('department-rev-percentage') || e.target.classList.contains('department-rev-amount')) {
                         if (Math.round(currentRevP * 100) > 10000 || Math.round(currentRevA * 100) > Math.round(totalRev * 100) + 1) {
-                            Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: 'Total Revenue Split exceeds project total. Please adjust.', confirmButtonColor: '#8035ca' });
+                            Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: 'Total Revenue Split exceeds project total. Please adjust.', confirmButtonColor: '#15803d' });
                         }
                     } else if (e.target.classList.contains('department-con-percentage') || e.target.classList.contains('department-con-amount')) {
                          if (Math.round(currentConP * 100) > 10000 || Math.round(currentConA * 100) > Math.round(totalCon * 100) + 1) {
-                            Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: 'Total Contribution Split exceeds project total. Please adjust.', confirmButtonColor: '#8035ca' });
+                            Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: 'Total Contribution Split exceeds project total. Please adjust.', confirmButtonColor: '#15803d' });
                         }
                     }
                 });

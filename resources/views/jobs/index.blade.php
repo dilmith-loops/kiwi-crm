@@ -264,7 +264,7 @@
                 border: 1px solid #e5e7eb !important;
             }
             .filter-form .ts-dropdown .active {
-                background-color: #8035ca !important;
+                background-color: #15803d !important;
                 color: white !important;
             }
         </style>

@@ -13,7 +13,7 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 bg-fixed" style="background: linear-gradient(135deg, #ff0878 0%, #8035ca 35%, #0057be 70%, #2fc9c3 100%);">
+<body class="min-h-screen flex items-center justify-center p-4 bg-fixed" style="background: linear-gradient(135deg, #14532d 0%, #15803d 35%, #65a30d 70%, #e28a34 100%);">
     <!-- Animated background shapes for depth -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
         <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-white/10 blur-3xl animate-pulse"></div>

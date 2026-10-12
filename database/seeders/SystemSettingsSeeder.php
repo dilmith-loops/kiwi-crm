@@ -20,10 +20,10 @@ class SystemSettingsSeeder extends Seeder
         Setting::set('company_vat', '10246299 - 7000', 'company');
 
         // Brand Colors
-        Setting::set('brand_pink', '#ff0878', 'branding');
-        Setting::set('brand_purple', '#8035ca', 'branding');
-        Setting::set('brand_blue', '#0057be', 'branding');
-        Setting::set('brand_teal', '#2fc9c3', 'branding');
+        Setting::set('brand_pink', '#84cc16', 'branding');
+        Setting::set('brand_purple', '#15803d', 'branding');
+        Setting::set('brand_blue', '#e28a34', 'branding');
+        Setting::set('brand_teal', '#10b981', 'branding');
 
         // Senior Managers
         SeniorManager::create(['name' => 'Manager A']);

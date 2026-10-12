@@ -35,8 +35,8 @@ Route::get('manifest.json', function () {
         'scope' => url('/'),
         'display' => 'standalone',
         'orientation' => 'any',
-        'background_color' => '#8035ca',
-        'theme_color' => '#8035ca',
+        'background_color' => '#15803d',
+        'theme_color' => '#15803d',
         'prefer_related_applications' => false,
         'icons' => [
             [
@@ -131,9 +131,9 @@ Route::get('images/pwa-icon-{size}.png', function ($size) {
     $cropH = 337;
 
     $dst = imagecreatetruecolor($size, $size);
-    // Brand purple #8035ca
-    $purple = imagecolorallocate($dst, 128, 53, 202);
-    imagefill($dst, 0, 0, $purple);
+    // Brand kiwi green #15803d
+    $kiwiGreen = imagecolorallocate($dst, 21, 128, 61);
+    imagefill($dst, 0, 0, $kiwiGreen);
 
     // Safe zone width is ~70% of canvas size (360px for 512, 135px for 192)
     $targetW = (int)round($size * (360 / 512));

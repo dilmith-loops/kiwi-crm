@@ -134,7 +134,7 @@
                             </div>
                             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Primary (Pink)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Primary Accent (Kiwi Lime)</label>
                                     <div class="flex items-center space-x-2">
                                         <input type="color" name="brand_pink"
                                             value="{{ \App\Models\Setting::get('brand_pink') }}"
@@ -145,7 +145,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Secondary (Blue)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Secondary (Kiwi Orange)</label>
                                     <div class="flex items-center space-x-2">
                                         <input type="color" name="brand_blue"
                                             value="{{ \App\Models\Setting::get('brand_blue') }}"
@@ -156,7 +156,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Accent (Purple)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Theme Primary (Kiwi Green)</label>
                                     <div class="flex items-center space-x-2">
                                         <input type="color" name="brand_purple"
                                             value="{{ \App\Models\Setting::get('brand_purple') }}"
@@ -167,7 +167,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Info (Teal)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Accent (Kiwi Mint)</label>
                                     <div class="flex items-center space-x-2">
                                         <input type="color" name="brand_teal"
                                             value="{{ \App\Models\Setting::get('brand_teal') }}"

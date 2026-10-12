@@ -10,7 +10,7 @@
     
     <!-- PWA Web App Meta Tags -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#8035ca">
+    <meta name="theme-color" content="#15803d">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,13 +24,13 @@
                 extend: {
                     colors: {
                         brand: {
-                            pink: '{{ \App\Models\Setting::get("brand_pink", "#ff0878") }}',
-                            purple: '{{ \App\Models\Setting::get("brand_purple", "#8035ca") }}',
-                            blue: '{{ \App\Models\Setting::get("brand_blue", "#0057be") }}',
-                            teal: '{{ \App\Models\Setting::get("brand_teal", "#2fc9c3") }}',
+                            pink: '{{ \App\Models\Setting::get("brand_pink", "#84cc16") }}',
+                            purple: '{{ \App\Models\Setting::get("brand_purple", "#15803d") }}',
+                            blue: '{{ \App\Models\Setting::get("brand_blue", "#e28a34") }}',
+                            teal: '{{ \App\Models\Setting::get("brand_teal", "#10b981") }}',
                         },
-                        primary: '{{ \App\Models\Setting::get("brand_pink", "#ff0878") }}',
-                        secondary: '#0057be', // Using blue as secondary
+                        primary: '{{ \App\Models\Setting::get("brand_purple", "#15803d") }}',
+                        secondary: '{{ \App\Models\Setting::get("brand_blue", "#e28a34") }}',
                         dark: '#1f2937',
                     }
                 }

@@ -9,7 +9,7 @@
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 550px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
         <!-- Header -->
         <tr>
-            <td style="background: linear-gradient(135deg, #ff0878 0%, #8035ca 50%, #0057be 100%); padding: 30px 25px; text-align: center;">
+            <td style="background: linear-gradient(135deg, #15803d 0%, #166534 50%, #e28a34 100%); padding: 30px 25px; text-align: center;">
                 <div style="margin-bottom: 12px;">
                     <img src="{{ url('images/logo_loops_light.png') }}" alt="Creative Kiwi" style="height: 48px; width: auto; display: inline-block;">
                 </div>
@@ -37,7 +37,7 @@
                     <span style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
                         Your 6-Digit Verification Code (OTP)
                     </span>
-                    <span style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 900; color: #8035ca; letter-spacing: 8px; display: inline-block;">
+                    <span style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 900; color: #15803d; letter-spacing: 8px; display: inline-block;">
                         {{ $otp }}
                     </span>
                 </div>
