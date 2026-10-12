@@ -305,12 +305,28 @@
                         </div>
                     </div>
 
+                    <div class="flex items-center gap-2">
+                        <label for="deal_search" class="text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Search:</label>
+                        <div class="relative min-w-[180px] sm:min-w-[210px]">
+                            <input type="text" name="search" id="deal_search" value="{{ request('search') }}"
+                                placeholder="Search deals, job #, brand..."
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-purple focus:ring-brand-purple text-xs py-1 pl-7 pr-7 border">
+                            <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[11px] pointer-events-none"></i>
+                            @if(request('search'))
+                                <button type="button" onclick="document.getElementById('deal_search').value=''; this.closest('form').submit();"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" title="Clear search">
+                                    <i class="fas fa-times text-[10px]"></i>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
                     <div class="flex items-center gap-1.5">
                         <button type="submit" class="px-3 py-1 bg-brand-purple text-white text-xs font-bold rounded-lg hover:bg-brand-blue transition-colors shadow-sm">
                             Filter
                         </button>
                         @php
-                            $hasActiveFilters = request('created_date_type') || request('expected_close_date_type') || 
+                            $hasActiveFilters = request('search') || request('created_date_type') || request('expected_close_date_type') || 
                                 (is_array(request('filter_user')) ? !empty(array_filter(request('filter_user'))) : request('filter_user')) || 
                                 (is_array(request('filter_department')) ? !empty(array_filter(request('filter_department'))) : request('filter_department')) || 
                                 (is_array(request('department')) ? !empty(array_filter(request('department'))) : request('department')) || 
@@ -350,6 +366,41 @@
                         if (!initFilterTomSelects()) {
                             document.addEventListener('DOMContentLoaded', initFilterTomSelects);
                         }
+
+                        // Instant client-side card filtering while typing
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var searchInput = document.getElementById('deal_search');
+                            if (!searchInput) return;
+
+                            var debounceTimer = null;
+                            searchInput.addEventListener('input', function() {
+                                clearTimeout(debounceTimer);
+                                debounceTimer = setTimeout(function() {
+                                    var query = searchInput.value.trim().toLowerCase();
+                                    var cols = document.querySelectorAll('.kanban-col');
+                                    cols.forEach(function(col) {
+                                        var cards = col.querySelectorAll('[data-id]');
+                                        var visible = 0;
+                                        cards.forEach(function(card) {
+                                            if (!query) {
+                                                card.style.display = '';
+                                                visible++;
+                                            } else {
+                                                var text = card.textContent.toLowerCase();
+                                                if (text.includes(query)) {
+                                                    card.style.display = '';
+                                                    visible++;
+                                                } else {
+                                                    card.style.display = 'none';
+                                                }
+                                            }
+                                        });
+                                        var badge = col.closest('.w-80')?.querySelector('.p-3 span.rounded-full');
+                                        if (badge) badge.textContent = visible;
+                                    });
+                                }, 150);
+                            });
+                        });
                     })();
                 </script>
             </div>
