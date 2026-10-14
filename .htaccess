@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Deny direct access to sensitive files and folders
+    RewriteRule ^\.env.* - [F,L,NC]
+    RewriteRule ^\.(git|svn|hg).* - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor)(/.*)?$ - [F,L,NC]
+    RewriteRule ^composer\.(json|lock)$ - [F,L,NC]
+    RewriteRule ^package\.(json|lock)$ - [F,L,NC]
+    RewriteRule ^phpunit\.xml$ - [F,L,NC]
+    RewriteRule ^vite\.config\.js$ - [F,L,NC]
+
+    # If the web server root points to this directory instead of public/,
+    # rewrite incoming traffic to the public/ folder
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

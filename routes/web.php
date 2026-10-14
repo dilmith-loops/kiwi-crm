@@ -384,6 +384,14 @@ Route::get('system-diagnose', function (\Illuminate\Http\Request $request) {
         $results['cache_clear_error'] = $e->getMessage();
     }
 
+    // 2.5 Storage link
+    try {
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        $results['storage_link'] = trim(\Illuminate\Support\Facades\Artisan::output());
+    } catch (\Throwable $e) {
+        $results['storage_link_error'] = $e->getMessage();
+    }
+
     // Ensure uploads/petty_cash_proofs directories exist and are writable
     $uploadDirs = [
         public_path('uploads/petty_cash_proofs'),
